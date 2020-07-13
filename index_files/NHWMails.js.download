@@ -1,0 +1,415 @@
+jQuery.noConflict(); 
+feba.loader.fnload(function(){
+
+	// Added by Sunil_Kumar27 for Mails Module - EBUX Stage 3
+	// This script adds document.getElementsByClassName to browsers like IE 
+	// which don't have it 
+	
+	if (!document.getElementsByClassName) {
+		document.getElementsByClassName = function (cn) { 
+			var rx = new RegExp("(?:^|\\s)" + cn+ "(?:$|\\s)");
+			var allT = document.getElementsByTagName("*"), allCN = [], ac="", i = 0, a;
+				while (a = allT[i=i+1]) {
+			  		ac=a.className;
+			  		if ( ac && ac.indexOf(cn) !==-1) {
+						if(ac===cn){ 
+							allCN[allCN.length] = a; 
+							continue;   
+						}
+						rx.test(ac) ? (allCN[allCN.length] = a) : 0;
+			  		}
+				}
+				return allCN;
+		};
+	}
+	
+});
+//This script opens textbox if a user wants to add a new folder
+			jQuery(".acc_button").live('click', function(event) {
+			event.preventDefault();
+			jQuery("#acc_button").attr("style", "display: inline;");	
+
+	
+	});
+			jQuery(".cancel").live('click', function(event) {
+			event.preventDefault();
+			jQuery("#acc_button").attr("style", "display: none;");	
+
+	
+	});
+	//This script opens textbox if a user wants to edit a particular folder
+			jQuery(".acc_btn").live('click', function(event) {
+			event.preventDefault();
+			jQuery("#acc_edit_button").attr("style", "display: inline;");			
+			jQuery(".acc_btn").attr("style", "display: none;");
+			//jQuery(".accordianmenuedit").attr("style", "display: none !important;");
+			jQuery(".widget h3").attr("style", "height: 110px;");
+	
+	});
+			jQuery("#cancel_folder").live('click', function(event) {
+			event.preventDefault();
+			jQuery("#acc_edit_button").attr("style", "display: none;");
+			jQuery(".acc_btn").attr("style", "display: inline;");
+			jQuery(".accordianmenuedit").attr("style", "display: inline;");
+			jQuery(".widget h3").attr("style", "height: 21px;");
+	
+	});
+	function expand(obj){
+             var expandImg = document.getElementById('MailsHomePageUX3_STATIC_MailListNew:reply');
+             var imageVal=feba.domManipulator.getElementEndingWith("plusImgMails");
+            // feba.domManipulator.trigger(imageVal,"click");
+             if(jQuery(obj).attr("name") == "AdvancedSearch"){    
+            		jQuery('.advance_wrapper').attr("style", "display: block;");                                                                    
+             		jQuery(obj).attr("name", "AdvSearch");    
+             }
+             else if(jQuery(obj).attr("name") == "AdvSearch"){
+	                 		jQuery('.advance_wrapper').attr("style", "display: none;");
+	                         jQuery(".advance_search_link").show();
+	                         jQuery(obj).attr("name", "AdvancedSearch");
+	                  }   
+	                  else{
+	                           feba.domManipulator.trigger(imageVal,"click");
+                      }
+                      
+     }
+//for advanced search mails module
+jQuery("#plusImgMails").live('click', function(event) {
+	              event.preventDefault(); 
+	    
+	             var expandImg = document.getElementById('plusImgMails');
+	             //removing hard coding of image path --  starts
+	               var imageSrc= jQuery(this).attr("src");
+	               var imagepath = "";
+	               var lastIndex= imageSrc.lastIndexOf("/"); 
+			 		if(lastIndex!=-1){
+			 			imagepath=imageSrc.substring(0,lastIndex );
+			 		}
+	             
+	              // if(jQuery(this).attr("src") == "L001/consumer/images/left_arrow.png"){
+	             //  	jQuery(this).attr("src","L001/consumer/images/right_arrow.png"); 
+			 	   if(jQuery(this).attr("src") == (imagepath+ "/left_arrow.png")){
+			 		jQuery(this).attr("src", imagepath+ "/right_arrow.png");
+			 		 //removing hard coding of image path --  ends
+	              	jQuery('.advance_wrapper').attr("style", "display: none;");
+					jQuery(".advance_search_link").show();
+					expandImg.title="Expand";
+	               	}
+	               	else
+	               	{
+	               	//removing hard coding of image path 
+	              // 	jQuery(this).attr("src","L001/consumer/images/left_arrow.png");
+	               	jQuery(this).attr("src",imagepath+ "/left_arrow.png");
+	               	jQuery('.advance_wrapper').attr("style", "display: block;");
+	               	expandImg.title="Collapse";
+					 }       
+	        });
+	//function to display block when reset button is clicked in search panel of mails module
+	jQuery("input:reset").live("click", function() {
+		var id = jQuery(this).attr("id");
+		if(id == "MailsHomePageUX3_STATIC_MailListNew:Clear"){
+			//removing hard coding of image path --  starts
+   			//jQuery("#plusImgMails").attr("src","L001/consumer/images/left_arrow.png");
+			var imageSrc= jQuery("#plusImgMails").attr("src");
+	        var imagepath = "";
+	        var lastIndex= imageSrc.lastIndexOf("/"); 
+	 		if(lastIndex!=-1)
+	 			imagepath=imageSrc.substring(0,lastIndex );
+	 		jQuery("#plusImgMails").attr("src",imagepath+ "/left_arrow.png");	
+	 		//removing hard coding of image path --  ends
+   			jQuery("#plusImgMails").attr("title","Collapse");
+   			jQuery('.advance_wrapper').attr("style", "display: block;");
+		}
+	});  
+	         
+// Function to highlight selected row 
+// This function is called on the click of details in HWMailsList 
+ 	function highlightRow(obj) {
+ 	//event.preventDefault(); 
+ 	jQuery(this).attr('href', 'javascript:void(0)');
+		var elem =obj.parentNode.parentNode;
+        var parentRow =obj.parentNode.parentNode;
+       	if(parentRow.className == 'brd_grayselected'){
+        }
+        else{
+        	var row1Ele = document.getElementsByClassName('brd_grayselected');
+        	if(row1Ele.length > 0){
+        		row1Ele[0].className = 'brd_gray';
+        	}
+        	var row2Ele = document.getElementsByClassName('brd_grayselected1');
+       		if(row2Ele.length > 0){
+       			row2Ele[0].className = 'brd_gray1';
+        	}
+        	
+        	elem.className = 'brd_grayselected';
+        	row2 = jQuery(elem).next();
+        	row2[0].className = 'brd_grayselected1';
+		}
+     }
+/*Added for EBUX Stage3*/
+function templateMesg(mesgobj)
+{	
+
+	var e = document.getElementById("SubjectDropDown");
+	if (e.selectedIndex=='0') {
+	          document.getElementById("MailFG.TEMP_SUBJECT").value=e.options[e.selectedIndex].innerHTML;
+	           document.getElementById("MailFG.TEMP_MAIL_BODY").value = "";
+	           var textArea = feba.domManipulator.getElementById("MailFG.TEMP_MAIL_BODY");    
+	           var editor = feba.domManipulator.getData(textArea,'editor');
+	           editor.updateFrame();
+	           return;
+    	}
+	var subject = e.options[e.selectedIndex].innerHTML;
+	document.getElementById("MailFG.TEMP_SUBJECT").value = subject;
+	var message = jQuery(mesgobj).val();
+	document.getElementById("MailFG.TEMP_MAIL_BODY").value = message;
+	var textArea = feba.domManipulator.getElementById("MailFG.TEMP_MAIL_BODY");	
+		var editor = feba.domManipulator.getData(textArea,'editor');
+		editor.updateFrame();
+       
+}
+
+
+/*Function to display search panel as a block on click of reset button*/
+
+function displayBlock()
+{
+
+var rowEle = document.getElementsByClassName('ERROR_ROW_BG');
+if((rowEle != null) && (rowEle.length > 0)){
+			//jQuery('input[type="submit"]').attr('disabled','disabled');
+			jQuery('.advance_wrapper').attr("style", "display: block;");
+			jQuery("#searchBtn").button("disable");
+		} 
+}
+/*printing content of particular div*/
+function printDivContent(id)
+{
+         var myDate=new Date();
+	 		
+	 		var day=myDate.getDate();
+	 		var month=myDate.getMonth();
+	 		var year=myDate.getFullYear();
+	 		var hours=myDate.getHours();
+	 		var minutes=myDate.getMinutes();
+	 		var seconds=myDate.getSeconds();
+	 	if (minutes < 10)
+	 	minutes = "0" + minutes
+	 
+	 	var suffix = "AM";
+	 	if (hours >= 12) {
+	 	suffix = "PM";
+	 	//hours = hours - 12;
+	 	}
+	 	if (hours == 0) {
+	 	hours = 12;
+	 	}
+	           var WindowObject = window.open('', 'printwindow'+new Date().getTime(), 'width=640,height=660,top=50,left=50,toolbars=no,scrollbars=yes,status=no,resizable=0');      
+	        WindowObject.onresize = function() 
+	 {
+	     WindowObject.resizeTo(640,660);
+	 }
+	 WindowObject.onclick = function() 
+	 {
+	     WindowObject.resizeTo(640,660);
+	 }
+	        
+	          WindowObject.document.write('<html><head><title>Finacle E-Banking : Mail Details</title>');
+	          WindowObject.document.write('<link rel="stylesheet" type="text/css" href="./L001/consumer/theme/new_style_HW.css">');
+	           WindowObject.document.write('<link rel="stylesheet" type="text/css" href="./L001/corporate/theme/new_style_HW.css">');
+	           WindowObject.document.write( '<script type="text/javascript"> function printpage(){window.print();window.location.reload();}</script>');
+	           WindowObject.document.write('</head>');
+	             WindowObject.document.write('<body style="background-color:#FFFFFF">');
+	            WindowObject.document.write('<center style="float:right">');
+	             WindowObject.document.write('<link rel="stylesheet" type="text/css" href="./L001/consumer/theme/new_style_HW.css">');
+	           WindowObject.document.write('<link rel="stylesheet" type="text/css" href="./L001/corporate/theme/new_style_HW.css">');
+	            var browserVersion=parseInt(navigator.appVersion);
+	 			var isIE=navigator.appName.indexOf("Microsoft")!=-1;
+	 			if(isIE&&browserVersion>=4){
+	            WindowObject.document.write('<span style="float: left;clear: right;margin-left: 5px;padding-left: 5px;margin-top: 5px;margin-right:5px;"><input type="button" style="font-family: arial,helvetica,sans-serif;font-size:0.75em;font-weight:bold;color:#fff;text-decoration:none;background:url(L001/consumer/images/sendbtn.png) ;width:45px; height:21px;border: 0px solid #333333;vertical-align:middle;overflow:visible;float:left;cursor:pointer;" onclick=printpage() value="Print"/></span>');        
+	 			}
+	 			else{
+	 			 WindowObject.document.write('<span style="float: left;clear: right;margin-left: 5px;padding-left: 5px;margin-top: 5px;margin-right:5px;"><input type="button" style="font-family: arial,helvetica,sans-serif;font-size:0.75em;font-weight:bold;color:#fff;text-decoration:none;background:url(L001/consumer/images/sendbtn.png) ;width:45px; height:21px;border: 0px solid #333333;vertical-align:middle;overflow:visible;float:left;cursor:pointer;" onclick="javascript:window.print();" value="Print"/></span>');
+	 			 }
+	 		  WindowObject.document.write('<span style="float: left;clear: right;margin-left: 5px;padding-left: 5px;margin-top: 5px;margin-right:5px;"><input type="button" style="font-family: arial,helvetica,sans-serif;font-size:0.75em;font-weight:bold;color:#fff;text-decoration:none;background:url(L001/consumer/images/sendbtn.png) ;width:45px; height:21px;border: 0px solid #333333;vertical-align:middle;overflow:visible;float:left;cursor:pointer;" onclick="javascript:window.close();" value="Close"/></span>');
+	            WindowObject.document.write('<span style="font-family: arial;font-size : 0.69em;text-decoration: none;padding-right:3px;">');
+	          WindowObject.document.write('Printed on'+'  '+day+'-'+month+'-'+year+'  '+hours+':'+minutes+':'+seconds+'  '+suffix);
+	          WindowObject.document.write('</span>');
+	           WindowObject.document.write('</center>');
+	         WindowObject.document.write('<span>');
+	           var rightpaneltop = jQuery('.right_top').html();
+	           WindowObject.document.writeln(rightpaneltop);  
+	           var rightpanelmid = jQuery('.right_midreplay').html();
+	           WindowObject.document.writeln(rightpanelmid); 
+	        WindowObject.document.write('</span>'); 
+            WindowObject.document.write('</body>');
+  }
+
+
+
+/*Function to load Confirmation Message while deleting personal folder*/
+function deletepfm()
+{
+     var fname = feba.domManipulator.getElementEndingWith("NEW_FOLDER_NAME");
+     var foldername=jQuery(fname).val();
+     var r=confirm("You are about to delete the Folder "+ foldername +".If it contains Messages, they would be destroyed on deleting this Folder. Are you sure you want to continue?");
+     var elem = document.getElementById('MailListFG.DELPFM_FLAG');
+    if(elem != null){
+           if (r==true){
+               elem.value="Y";
+           }
+        else
+        {
+            elem.value="N";
+        }
+    }
+                
+}
+/*Function to handle div heights in mailview page*/
+function adjustDivHeight()
+{
+        var str="N";
+	            lefterr=false;
+				righterr=false;
+				rightsuccess=false;
+				leftsuccess=false;
+				searcherror=false;
+				var child=null;
+				var childview=null;
+				
+				var errID = feba.domManipulator.getElementById("MAILSHOMEPAGEUX3_STATIC_MAILLISTNEW");
+	            //var errID = feba.domManipulator.getElementById("MessageDisplay_TABLE");
+	            var errviewID = feba.domManipulator.getElementById("MAILSHOMEPAGEUX3_STATIC_MAILVIEW");
+	            child = errID.children().children()[1];
+	            childlist = errID.children().children()[4];
+	          	var leftnullcheck = feba.domManipulator.getChildren(errID);
+	            childview = errviewID.children().children()[1];
+	            var rightnullcheck = feba.domManipulator.getChildren(errviewID);  
+	           	if((jQuery(leftnullcheck[0]).attr("id")=="MessageDisplay_TABLE") || (jQuery(rightnullcheck[0]).attr("id")=="MessageDisplay_TABLE")){
+	            	if(jQuery(leftnullcheck[0]).attr("id")=="MessageDisplay_TABLE"){
+	           				if(child.className=='redbg')
+	            			{
+	            				lefterr=true;
+	            			}
+	            			if(childlist.className=='greenbg')
+	            			{
+	            				leftsuccess=true;
+	            			}
+	            			if(childlist.className=='redbg')
+	            			{
+	            				searcherror=true;
+	            			}
+	            	}
+	            	if(jQuery(rightnullcheck[0]).attr("id")=="MessageDisplay_TABLE"){
+	            			if(childview.className=='redbg')
+	            			{
+	            				righterr=true;
+	            			}
+	            			if(childview.className=='greenbg')
+	            			{
+	            				rightsuccess=true;
+	            			}
+	            	}
+	            }         
+	         	else if((jQuery.browser.msie) && (BrowserDetect.version == 8 || BrowserDetect.version == 9))
+	            {
+			            jQuery(".right_panel").attr("style", "height: 582px;");
+			            jQuery(".right_midreplay").attr("style", "height: 381px;");
+			            jQuery(".right_midreplay_template").attr("style", "height: 433px;");
+				            jQuery(".section").attr("style", "padding-top: 0em;");
+			            jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+	            }
+	            else{
+				            jQuery(".right_panel").attr("style", "height: 591px;");
+				            jQuery(".right_midreplay").attr("style", "height: 391px;"); 
+				            jQuery(".right_midreplay_template").attr("style", "height: 443px;");    
+				            jQuery(".section").attr("style", "padding-top: 0em;");
+			            jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+	            }
+	           
+	            if((jQuery.browser.msie) && (BrowserDetect.version == 8 || BrowserDetect.version == 9)){
+	            			 
+	            			 if(lefterr == true && leftsuccess==true){
+				         	jQuery(".rightgrouplet").attr("style","margin-top: 111px;");
+				            }
+				            if(lefterr == true && searcherror==true){
+				         	jQuery(".rightgrouplet").attr("style","margin-top: 111px;");
+				            }
+	            			 if(lefterr == true && leftsuccess==false &&  rightsuccess==false  && righterr==false && searcherror==false){
+			         	jQuery(".right_panel").attr("style", "height: 582px;");
+			            jQuery(".right_midreplay").attr("style", "height: 381px;");       
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 73px;");
+			             jQuery(".right_panel_wrapper").attr("style","height: 580px;");
+				            }
+				              if(lefterr ==true && rightsuccess==true){
+			         	jQuery(".right_panel").attr("style", "height: 554px;");
+			            jQuery(".right_midreplay").attr("style", "height: 352px;");       
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 75px;");   			
+				            }
+				             if(lefterr ==true && righterr==true ){
+			           	jQuery(".right_panel").attr("style", "height: 556px;");
+			            jQuery(".right_midreplay").attr("style", "height: 354px;");     
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 75px;");
+				    			
+				            }
+				          	if(lefterr == false && rightsuccess==true){
+			          	jQuery(".right_panel").attr("style", "height: 554px;");
+			             jQuery(".right_midreplay").attr("style", "height: 352px;");           
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+			             jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+				            }
+				
+				            if(lefterr == false && righterr==true){
+			             jQuery(".right_panel").attr("style", "height: 554px;");
+			             jQuery(".right_midreplay").attr("style", "height: 352px;");           
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+			             jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+				    			
+				            }
+	            }
+	            else{
+	            			if(lefterr == true && leftsuccess==true){
+				         	jQuery(".rightgrouplet").attr("style","margin-top: 111px;");
+				            }
+				            if(lefterr == true && searcherror==true){
+				         	jQuery(".rightgrouplet").attr("style","margin-top: 111px;");
+				            }
+				            if(lefterr == true && leftsuccess==false && rightsuccess==false  && righterr==false && searcherror==false){
+				         	jQuery(".right_panel").attr("style", "height: 591px;");
+				            jQuery(".right_midreplay").attr("style", "height: 391px;");       
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 73px;");
+				            }
+				              if(lefterr ==true && rightsuccess==true){
+			         	jQuery(".right_panel").attr("style", "height: 562px;");
+			            jQuery(".right_midreplay").attr("style", "height: 362px;");       
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 75px;");   			
+				            }
+				             if(lefterr ==true && righterr==true ){
+			           	jQuery(".right_panel").attr("style", "height: 564px;");
+			            jQuery(".right_midreplay").attr("style", "height: 364px;");     
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+				             jQuery(".rightgrouplet").attr("style","margin-top: 75px;");
+				    			
+				            }
+				          	if(lefterr == false && rightsuccess==true){
+				          	jQuery(".right_panel").attr("style", "height: 563px;");
+				             jQuery(".right_midreplay").attr("style", "height: 363px;");           
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+			             jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+				            }
+				
+				            if(lefterr == false && righterr==true){
+				             jQuery(".right_panel").attr("style", "height: 566px;");
+				             jQuery(".right_midreplay").attr("style", "height: 366px;");           
+				             jQuery(".section").attr("style", "padding-top: 0em;");
+			             jQuery(".rightgrouplet").attr("style","margin-top: 48px;");
+				    			
+				            }
+			  }
+}
+
+/*End of EBUX stage3*/

@@ -1,0 +1,624 @@
+﻿/**
+ * This is a global hash map implementaion variable.
+ * All the alert messages are put into this variable.
+ */
+var alertMap = new Map();
+
+/**
+ * This is a global hash map implementaion variable.
+ * The error code and variable name mapping is maintained in this hash map.
+ */
+var errCodeMap = new Map();
+
+/**
+ * This method creates arrays of alert messages. Each array contains one message in different languages.
+ * These arrays are put into the global hash map 'alertMap'.
+ */
+function createMessageMap(){
+	var NoMovieFound = {"001":"FinanZtools movie not found on this page",
+	"002":"FinanZtools movie not found on this page",
+	"003":"FinanZtools movie not found on this page_سب",
+	"004":"FinanZtools movie not found on this page_म_ब"};
+	var PinPadNotSup = {"001":"Pin Pad not supported by your browser",
+	"002":"Pin Pad not supported by your browser",
+	"003":"Pin Pad not supported by your browser_سب",
+	"004":"Pin Pad not supported by your browser_म_ब"};
+	var MinYearInputAbove = {"001":"The minimum year input for this format is above 2000 only. To enter a lower value, please change the preferred date format to one containing yyyy",
+	"002":"The minimum year input for this format is above 2000 only. To enter a lower value, please change the preferred date format to one containing yyyy",
+	"003":"The minimum year input for this format is above 2000 only. To enter a lower value, please change the preferred date format to one containing yyyy_سب",
+	"004":"The minimum year input for this format is above 2000 only. To enter a lower value, please change the preferred date format to one containing yyyy_म_ब"};
+	var SaveAndOpen = {"001":"Please save and open the file.",
+	"002":"Please save and open the file.",
+	"003":"Please save and open the file._سب",
+	"004":"Please save and open the file._म_ब"};
+	var LogOutIfOpened = {"001":"You would be logged out of the application, if the file is opened directly.",
+	"002":"You would be logged out of the application, if the file is opened directly.",
+	"003":"You would be logged out of the application, if the file is opened directly._سب",
+	"004":"You would be logged out of the application, if the file is opened directly._म_ब"};
+	var ErrSignFailed = {"001":"Error - Signature Failed",
+	"002":"Error - Signature Failed",
+	"003":"Error - Signature Failed_سب",
+	"004":"Error - Signature Failed_म_ब"};
+	var UnderScores = {"001":"___________________________________________",
+	"002":"___________________________________________",
+	"003":"____________________________________________سب",
+	"004":"____________________________________________म_ब"};
+	var SignFailReason = {"001":"Reason:",
+	"002":"Reason:",
+	"003":"Reason:_سب",
+	"004":"Reason:_म_ब"};
+	var BrowserNtJavaEn = {"001":"Your browser is not Java enabled. Please enable Java for enhanced security.",
+	"002":"Your browser is not Java enabled. Please enable Java for enhanced security.",
+	"003":"Your browser is not Java enabled. Please enable Java for enhanced security._سب",
+	"004":"Your browser is not Java enabled. Please enable Java for enhanced security._म_ब"};
+	var ExceedMaxLen = {"001":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '.",
+	"002":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '.",
+	"003":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '._म_ब"};
+	var OnlyUpperCase = {"001":"Value entered  in $fieldLabel$  field should be in upper case.",
+	"002":"Value entered  in $fieldLabel$  field should be in upper case.",
+	"003":"Value entered  in $fieldLabel$  field should be in upper case._سب",
+	"004":"Value entered  in $fieldLabel$  field should be in upper case._म_ब"};
+	var OnlyLowerCase = {"001":"Value entered  in $fieldLabel$  field should be in lower case.",
+	"002":"Value entered  in $fieldLabel$  field should be in lower case.",
+	"003":"Value entered  in $fieldLabel$  field should be in lower case._سب",
+	"004":"Value entered  in $fieldLabel$  field should be in lower case._म_ब"};
+	var ShouldBeAlphaNum = {"001":"Value entered  in $fieldLabel$  field should be alphanumeric.",
+	"002":"Value entered  in $fieldLabel$  field should be alphanumeric.",
+	"003":"Value entered  in $fieldLabel$  field should be alphanumeric._سب",
+	"004":"Value entered  in $fieldLabel$  field should be alphanumeric._म_ब"};
+	var ShouldBeNumeric = {"001":"Value entered  in $fieldLabel$  field should be numeric.",
+	"002":"Value entered  in $fieldLabel$  field should be numeric.",
+	"003":"Value entered  in $fieldLabel$  field should be numeric._سب",
+	"004":"Value entered  in $fieldLabel$  field should be numeric._म_ब"};
+	var ShouldBeAlphabets = {"001":"Value entered  in $fieldLabel$  field should be alphabets.",
+	"002":"Value entered  in $fieldLabel$  field should be alphabets.",
+	"003":"Value entered  in $fieldLabel$  field should be alphabets._سب",
+	"004":"Value entered  in $fieldLabel$  field should be alphabets._म_ब"};
+	var JS16 = {"001":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '.",
+	"002":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '.",
+	"003":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed length ' $maxLength$ '._म_ब"};
+	var LessThanMinVal = {"001":"Value entered  in $fieldLabel$  field is less than the minimum allowed value ' $minValue$ '.",
+	"002":"Value entered  in $fieldLabel$  field is less than the minimum allowed value ' $minValue$ '.",
+	"003":"Value entered  in $fieldLabel$  field is less than the minimum allowed value ' $minValue$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is less than the minimum allowed value ' $minValue$ '._म_ब"};
+	var ExceedsMaxVal = {"001":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed value ' $maxValue$ '.",
+	"002":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed value ' $maxValue$ '.",
+	"003":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed value ' $maxValue$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is exceeding the maximum allowed value ' $maxValue$ '._म_ब"};
+	var OnlyOneChar = {"001":"The field  in $fieldLabel$  field should contain only a single character.",
+	"002":"The field  in $fieldLabel$  field should contain only a single character.",
+	"003":"The field  in $fieldLabel$  field should contain only a single character._سب",
+	"004":"The field  in $fieldLabel$  field should contain only a single character._म_ब"};
+	var InValidChar_VALID_SET = {"001":"Value entered  in $fieldLabel$  field is not a valid character according to the VALID_SET ' $specialChars$ '.",
+	"002":"Value entered  in $fieldLabel$  field is not a valid character according to the VALID_SET ' $specialChars$ '.",
+	"003":"Value entered  in $fieldLabel$  field is not a valid character according to the VALID_SET ' $specialChars$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is not a valid character according to the VALID_SET ' $specialChars$ '._म_ब"};
+	var InValidChar_INVALID_SET = {"001":"Value entered  in $fieldLabel$  field is not a valid character, since INVALID_SET contains ' $specialChars$ '.",
+	"002":"Value entered  in $fieldLabel$  field is not a valid character, since INVALID_SET contains ' $specialChars$ '.",
+	"003":"Value entered  in $fieldLabel$  field is not a valid character, since INVALID_SET contains ' $specialChars$ '._سب",
+	"004":"Value entered  in $fieldLabel$  field is not a valid character, since INVALID_SET contains ' $specialChars$ '._म_ब"};
+	var InvInterpretMode = {"001":"Invalid interpretation mode for   in $fieldLabel$  field .",
+	"002":"Invalid interpretation mode for   in $fieldLabel$  field .",
+	"003":"Invalid interpretation mode for   in $fieldLabel$  field ._سب",
+	"004":"Invalid interpretation mode for   in $fieldLabel$  field ._म_ब"};
+	var AddMesgType = {"001":"Please correct the entered value or clear it to proceed.",
+	"002":"Please correct the entered value or clear it to proceed.",
+	"003":"Please correct the entered value or clear it to proceed._سب",
+	"004":"Please correct the entered value or clear it to proceed._म_ब"};
+	var InvalidAmount = {"001":"Amount entered  in $fieldLabel$  field is not valid.",
+	"002":"Amount entered  in $fieldLabel$  field is not valid.",
+	"003":"Amount entered  in $fieldLabel$  field is not valid._سب",
+	"004":"Amount entered  in $fieldLabel$  field is not valid._म_ब"};
+	var ExceedMaxAmt = {"001":"Amount entered  in $fieldLabel$  field is exceeding the maximum allowed amount ' $maxValue$ '.",
+	"002":"Amount entered  in $fieldLabel$  field is exceeding the maximum allowed amount ' $maxValue$ '.",
+	"003":"Amount entered  in $fieldLabel$  field is exceeding the maximum allowed amount ' $maxValue$ '._سب",
+	"004":"Amount entered  in $fieldLabel$  field is exceeding the maximum allowed amount ' $maxValue$ '._म_ब"};
+	var InvalidDateFormat = {"001":"Date entered in $fieldLabel$ field is not in the preferred format ' $dateFormat$ ' or the Date entered is Invalid.",
+	"002":"Date entered  in $fieldLabel$  field is not in the preferred format ' $dateFormat$ ' or the Date entered is Invalid.",
+	"003":"Date entered  in $fieldLabel$  field is not in the preferred format ' $dateFormat$ ' or the Date entered is Invalid._سب",
+	"004":"Date entered  in $fieldLabel$  field is not in the preferred format ' $dateFormat$ ' or the Date entered is Invalid._म_ब"};
+	var JS27 = {"001":"You are going to digitally sign the following string with your private key:",
+	"002":"You are going to digitally sign the following string with your private key:",
+	"003":"You are going to digitally sign the following string with your private key:_سب",
+	"004":"You are going to digitally sign the following string with your private key:_म_ब"};
+	var InvalidHrsVal = {"001":"Invalid hours value: '",
+	"002":"Invalid hours value: '",
+	"003":"Invalid hours value: '_سب",
+	"004":"Invalid hours value: '_म_ब"};
+	var AllowedHrsRng = {"001":"'.\nAllowed range is 00-23.",
+	"002":"'.\nAllowed range is 00-23.",
+	"003":"'.\nAllowed range is 00-23._سب",
+	"004":"'.\nAllowed range is 00-23._म_ब"};
+	var InvalidMinutesVal = {"001":"Invalid minutes value: '",
+	"002":"Invalid minutes value: '",
+	"003":"Invalid minutes value: '_سب",
+	"004":"Invalid minutes value: '_म_ब"};
+	var AllowedMinutesRng = {"001":"'.\nAllowed range is 00-59.",
+	"002":"'.\nAllowed range is 00-59.",
+	"003":"'.\nAllowed range is 00-59._سب",
+	"004":"'.\nAllowed range is 00-59._म_ब"};
+	var InvalidSecondsVal = {"001":"Invalid seconds value: '",
+	"002":"Invalid seconds value: '",
+	"003":"Invalid seconds value: '_سب",
+	"004":"Invalid seconds value: '_म_ब"};
+	var OnlyUnsignIntAllowed = {"001":"'.\nAllowed values are unsigned integers.",
+	"002":"'.\nAllowed values are unsigned integers.",
+	"003":"'.\nAllowed values are unsigned integers._سب",
+	"004":"'.\nAllowed values are unsigned integers._म_ब"};
+	var ErrCallingCalendar = {"001":"Error calling the calendar: no target control specified",
+	"002":"Error calling the calendar: no target control specified",
+	"003":"Error calling the calendar: no target control specified_سب",
+	"004":"Error calling the calendar: no target control specified_म_ब"};
+	var ErrCallCalInvalidTar = {"001":"Error calling the calendar: parameter specified is not valid target control",
+	"002":"Error calling the calendar: parameter specified is not valid target control",
+	"003":"Error calling the calendar: parameter specified is not valid target control_سب",
+	"004":"Error calling the calendar: parameter specified is not valid target control_म_ब"};
+	var SignWithPrivateKey = {"001":"You are going to digitally sign the following string with your private key:",
+	"002":"You are going to digitally sign the following string with your private key:",
+	"003":"You are going to digitally sign the following string with your private key:_سب",
+	"004":"You are going to digitally sign the following string with your private key:_म_ब"};
+	var BrowserNotSupp = {"001":"Unrecognized browser. Currently this script\nsupports IE 4.0+ and Netscape4.0+ only",
+	"002":"Unrecognized browser. Currently this script\nsupports IE 4.0+ and Netscape4.0+ only",
+	"003":"Unrecognized browser. Currently this script\nsupports IE 4.0+ and Netscape4.0+ only_سب",
+	"004":"Unrecognized browser. Currently this script\nsupports IE 4.0+ and Netscape4.0+ only_म_ब"};
+	var UnRecognisedBrwser = {"001":"Unrecognized browser.",
+	"002":"Unrecognized browser.",
+	"003":"Unrecognized browser._سب",
+	"004":"Unrecognized browser._म_ब"};
+	var FormNotSigned = {"001":"The form could not be signed now as the signature operation failed.",
+	"002":"The form could not be signed now as the signature operation failed.",
+	"003":"The form could not be signed now as the signature operation failed._سب",
+	"004":"The form could not be signed now as the signature operation failed._म_ब"};
+	var TryLaterRepToAdm = {"001":"Please try later and if problem persists you may like to report following error to administrator.",
+	"002":"Please try later and if problem persists you may like to report following error to administrator.",
+	"003":"Please try later and if problem persists you may like to report following error to administrator._سب",
+	"004":"Please try later and if problem persists you may like to report following error to administrator._म_ब"};
+	var SigningAborted = {"001":"Signing operation aborted by user or no valid user certificate.",
+	"002":"Signing operation aborted by user or no valid user certificate.",
+	"003":"Signing operation aborted by user or no valid user certificate._سب",
+	"004":"Signing operation aborted by user or no valid user certificate._म_ब"};
+	var CapicomNotInst = {"001":"Signature operation failed. The required Signing component (capicom.dll) is not installed on your machine.",
+	"002":"Signature operation failed. The required Signing component (capicom.dll) is not installed on your machine.",
+	"003":"Signature operation failed. The required Signing component (capicom.dll) is not installed on your machine._سب",
+	"004":"Signature operation failed. The required Signing component (capicom.dll) is not installed on your machine._म_ब"};
+	var ContactAdmin = {"001":"Please contact administrator for further help.",
+	"002":"Please contact administrator for further help.",
+	"003":"Please contact administrator for further help._سب",
+	"004":"Please contact administrator for further help._म_ब"};
+	var CapicomNotRegd = {"001":"capicom.dll not available/registered on local machine",
+	"002":"capicom.dll not available/registered on local machine",
+	"003":"capicom.dll not available/registered on local machine_سب",
+	"004":"capicom.dll not available/registered on local machine_म_ब"};
+	var ExpandOrCollapse = {"001":"Expand or Collapse",
+	"002":"Expand or Collapse",
+	"003":"Expand or Collapse_سب",
+	"004":"Expand or Collapse_म_ब"};
+	var Expand = {"001":"Expand",
+	"002":"Expand",
+	"003":"Expand_سب",
+	"004":"Expand_म_ब"};
+	var Collapse = {"001":"Collapse",
+	"002":"Collapse",
+	"003":"Collapse_سب",
+	"004":"Collapse_म_ब"};
+
+var SessionTimeoutMsg = {"001":"Your session will timeout in ",
+				  "002":"Таны дансны нууцлалыг хангах үүднээс үйлдэл хийлгүй 30 минут болоход таны холболтыг автоматаар салгагдах тохиргоотой. Таны холболт ",
+				  "003":"Your session will timeout in_سب ",
+                  "004":"Your session will timeout in_म_ब "};	
+var SessionExpiredMsg = {"001":"Your session has expired.",
+				"002":"Таны дансны нууцлалыг хангах үүднээс үйлдэл хийлгүй 30 минут болсон тул таны холболт автоматаар салгагдлаа.",
+				"003":"Your session has expired._سب",
+				"004":"Your session has expired._म_ब"};
+var ReloginMsg = {"001":"You have to re-login to continue working.",
+			"002":"Интернэт банк үргэлжлүүлэн ашиглахын тулд дахин нэвтэрнэ үү.",
+			"003":"You have to re-login to continue working._سب",
+			"004":"You have to re-login to continue working._म_ब"};
+var SessionExpiringMsg = {"001":"Your session will expire in ",
+				"002":"Таны нууцлалыг хангах үүднээс үйлдэл хийлгүй 30 минут болоход таны холболтыг автоматаар салгагдах тохиргоотой. Таны холболт ",
+				"003":"Your session will expire in _سب",
+				"004":"Your session will expire in _म_ब"};
+var Seconds = {"001":" seconds.",
+				"002":" секундийн дараа салгагдана.",
+				"003":" seconds._سب",
+				"004":" seconds._म_ब"};
+var Continue_button = {"001":"Continue",
+    "002":"Үргэлжлүүлэх",
+    "003":"Continue",
+    "004":"Continue"};
+var Cancel_button = {"001":"Close",
+    "002":"Хаах",
+    "003":"Close",
+    "004":"Close"};
+var ContinueSessionMsg = {"001":"If you want to continue, please click 'Continue Session' button, if not click 'Close' button.",
+				"002":"Хэрэв үргэлжлүүлэн  ашиглах бол 'Холболт үргэлжлүүлэх' товч, холболтыг салгах бол 'Хаах' товч дээр дарна уу.",
+				"003":"If you want to continue, please click 'Continue Session' button, if not click 'Close' button._سب",
+				"004":"If you want to continue, please click 'Continue Session' button, if not click 'Close' button._म_ब"};
+var SessionAlert ={"001":"Session Alert ",
+			  "002":"Холболтын хугацаа дуусах анхааруулга",
+			  "003":"Session Alert_سب ",
+       		  "004":"Session Alert_म_ब  "	};
+var GoToLoginPage = {"001":"Go to Login Page.",
+			"002":"Нэвтрэх нүүр",
+			"003":"Go to Login Page._سب",
+			"004":"Go to Login Page._म_ब"};
+			
+var timeout  = {"001":"Error Loading Widget ",
+	"002":"Error Loading Widget ",
+	"003":"Error Loading Widget_سب ",
+	"004":"Error Loading Widget_म_ब "};
+				                         
+var error   = {"001":"Error Loading Widget ",
+			"002":"Error Loading Widget ",
+			"003":"Error Loading Widget_سب ",
+			"004":"Error Loading Widget_म_ब "};
+				                         
+var abort  = {"001":"Error Loading Widget ",
+				"002":"Error Loading Widget ",
+			  "003":"Error Loading Widget_سب ",
+			"004":"Error Loading Widget_म_ब "};
+				
+var parsererror  = {"001":"Error Loading Widget ",
+				"002":"Error Loading Widget ",
+				"003":"Error Loading Widget_سب ",
+			         "004":"Error Loading Widget_म_ब "};
+			         
+
+var fatal = {"001":"Error Loading Widget ",
+		"002":"Error Loading Widget ",
+		"003":"Error Loading Widget_سب ",
+	 "004":"Error Loading Widget_म_ब "};			         
+	var LastWidget = {"001":"You are removing the last widget from this page; Do you want to continue?",
+			"002":"Та сүүлийн хэрэгслүүрийг устгахдаа итгэлтэй байна уу?",
+			"003":"You are removing the last widget from this page; Do you want to continue?_سب",
+			"004":"You are removing the last widget from this page; Do you want to continue?_म_ब"};
+	var NoWidgets =	{"001":"You currently have no Widgets added. Add more using the Widget Library",
+			"002":"Одоогоор нэмсэн хэрэгслүүр олдсонгүй. Самбар тохируулах товчийг ашиглан тохиргоо хийнэ үү. ",
+			"003":"You currently have no Widgets added. Add more using the Widget Library_سب",
+			"004":"You currently have no Widgets added. Add more using the Widget Library_म_ब"};	
+	var NoConfiguredWidgets =	{"001":"You currently have no Widgets.",
+			"002":"Одоогоор нэмсэн хэрэгслүүр олдсонгүй.",
+			"003":"You currently have no Widgets._سب",
+			"004":"You currently have no Widgets_म_ब"};			
+	var NoWidgetsTitle = {"001":"You have 1 Error Message",
+			"002":"Алдааны мессеж байна.",
+			"003":"You have 1 Error Message_سب",
+			"004":"You have 1 Error Message_म_ब"};
+	var NoWidgetsAlt = {"001":"You have 1 Error Message",
+			"002":"Алдааны мессеж байна.",
+			"003":"You have 1 Error Message_سب",
+			"004":"You have 1 Error Message_म_ब"};
+	var NoWidgetsImageSrc = {"001":"L001/consumer/images/error-icon.gif",
+			"002":"L001/consumer/images/error-icon.gif",
+			"003":"L001/consumer/images/error-icon.gif_سب",
+			"004":"L004/consumer/images/error-icon.gif_म_ब"};
+	var Select = {"001":"Select",
+			"002":"Select",
+			"003":"Select",
+			"004":"Select"};
+	var TitleForMinimize = {"001":"Minimize",
+			"002":"Багасгах",
+			"003":"Minimize_سب",
+			"004":"Minimize_म_ब"};	
+	var AltForMinimize = {"001":"Click to Minimize Widget",
+			"002":"Click to Minimize Widget",
+			"003":"Click to Minimize Widget_سب",
+			"004":"Click to Minimize Widget_म_ब"};
+	var TitleForMaximize = {"001":"Maximize",
+			"002":"Ихэсгэх",
+			"003":"Maximize_سب",
+			"004":"Maximize_म_ब"};
+	var AltForMaximize = {"001":"Click to Maximize Widget",
+			"002":"Click to Maximize Widget",
+			"003":"Click to Maximise Widget_سب",
+			"004":"Click to Maximise Widget_म_ब"};
+	var TitleForClose = {"001":"Close",
+			"002":"Хаах",
+			"003":"Close_سب",
+			"004":"Close_म_ब"};
+	var AltForClose = {"001":"Click to Close widget",
+			"002":"Click to Close widget",
+			"003":"Click to Close widget_سب",
+			"004":"Click to Close widget_म_ब"};	
+	var TitleForRefresh = {"001":"Refresh",
+			"002":"Сэргээх",
+			"003":"Refresh_سب",
+			"004":"Refresh_म_ब"};
+	var AltForRefresh = {"001":"Click to Refresh widget",
+			"002":"Click to Refresh widget",
+			"003":"Click to Refresh widget_سب",
+			"004":"Click to Refresh widget_म_ब"};	
+	var Refresh = {"001":"Refresh Widget",
+			"002":"Refresh Widget",
+			"003":"Refresh Widget_سب",
+			"004":"Refresh Widget_म_ब"};
+	var ErrorLoadingWidget = {"001":"Error Loading Widget",
+			"002":"Error Loading Widget",
+			"003":"Error Loading Widget_سب",
+			"004":"Error Loading Widget_म_ब"};
+	var Close  = {"001":"Close",
+			"002":"Хаах",
+			"003":"Close_سب",
+			"004":"Close_म_ब"};
+	var comboBoxNoItemFoundMsg = {"001":" did not match any item!", "002":" did not match any item! in 002","004":" did not match any item!_??"};
+	var comboBoxShowAllButton = {"001":"Show All Items", "002":"Show All Items 002","004":"Show All Items_??"};
+
+	var CacheInvalidationSuccess = {"001":"Cache Invalidation Successful on HOST",
+			"002":"Cache Invalidation Successful on HOST",
+			"003":"Cache Invalidation Successful on HOST_سب",
+			"004":"Cache Invalidation Successful on HOST_म_ब"};
+	var ErrorMessageTitle = {"001":"You have Error Message",
+			"002":"You have Error Message",
+			"003":"You have Error Message_سب",
+			"004":"You have Error Message_म_ब"};
+	var OneInformtnMessageTitle = {"001":"You have  1 Information Message",
+			"002":"You have  1 Information Message",
+			"003":"You have  1 Information Message_سب",
+			"004":"You have  1 Information Message_म_ब"};
+	var CacheInvalidationUnSuccess = {"001":"Cache Invalidation Unsuccessful",
+			"002":"Cache Invalidation Unsuccessful",
+			"003":"Cache Invalidation Unsuccessful_سب",
+			"004":"Cache Invalidation Unsuccessful_म_ब"};
+	var Host = {"001":"HOST ",
+			"002":"HOST ",
+			"003":"HOST_سب ",
+			"004":"HOST_म_ब "};
+	var ForPort = {"001":" for port number ","002":" for port number ","004":" for port number _??"};
+	var All = {"001":"All","002":"All in 002","004":"All_??"};
+	var ScrollUp = {"001":"Scroll Up",
+	"002":"Scroll Up",
+	"004":"Scroll Up_??"};
+	var ExpandWidgetBar = {"001":"Expand Widget Bar",
+	"002":"Expand Widget Bar",
+	"004":"Expand Widget Bar_??"};
+	var CollapseWidgetBar = {"001":"Collapse Widget Bar",
+	"002":"Collapse Widget Bar",
+	"004":"Collapse Widget Bar_??"};	
+	var ScrollDown = {"001":"Scroll Down",
+	"002":"Scroll Down",
+	"004":"Scroll Down_??"};	
+
+	//alertMap.put("NoMovieFound",NoMovieFound);
+	//alertMap.put("PinPadNotSup",PinPadNotSup);
+	//alertMap.put("MinYearInputAbove",MinYearInputAbove);
+	//alertMap.put("SaveAndOpen",SaveAndOpen);
+	//alertMap.put("LogOutIfOpened",LogOutIfOpened);
+	//alertMap.put("ErrSignFailed",ErrSignFailed);
+	//alertMap.put("UnderScores",UnderScores);
+	//alertMap.put("SignFailReason",SignFailReason);
+	//alertMap.put("BrowserNtJavaEn",BrowserNtJavaEn);
+	//alertMap.put("ExceedMaxLen",ExceedMaxLen);
+	//alertMap.put("OnlyUpperCase",OnlyUpperCase);
+	//alertMap.put("OnlyLowerCase",OnlyLowerCase);
+	//alertMap.put("ShouldBeAlphaNum",ShouldBeAlphaNum);
+	//alertMap.put("ShouldBeNumeric",ShouldBeNumeric);
+	//alertMap.put("ShouldBeAlphabets",ShouldBeAlphabets);
+	//alertMap.put("JS16",JS16);
+	//alertMap.put("LessThanMinVal",LessThanMinVal);
+	//alertMap.put("ExceedsMaxVal",ExceedsMaxVal);
+	//alertMap.put("OnlyOneChar",OnlyOneChar);
+	//alertMap.put("InValidChar_VALID_SET",InValidChar_VALID_SET);
+	//alertMap.put("InValidChar_INVALID_SET",InValidChar_INVALID_SET);
+	//alertMap.put("InvInterpretMode",InvInterpretMode);
+	//alertMap.put("AddMesgType",AddMesgType);
+	//alertMap.put("InvalidAmount",InvalidAmount);
+	//alertMap.put("ExceedMaxAmt",ExceedMaxAmt);
+	//alertMap.put("InvalidDateFormat",InvalidDateFormat);
+	//alertMap.put("JS27",JS27);
+	//alertMap.put("InvalidHrsVal",InvalidHrsVal);
+	//alertMap.put("AllowedHrsRng",AllowedHrsRng);
+	//alertMap.put("InvalidMinutesVal",InvalidMinutesVal);
+	//alertMap.put("AllowedMinutesRng",AllowedMinutesRng);
+	//alertMap.put("InvalidSecondsVal",InvalidSecondsVal);
+	//alertMap.put("OnlyUnsignIntAllowed",OnlyUnsignIntAllowed);
+	//alertMap.put("ErrCallingCalendar",ErrCallingCalendar);
+	//alertMap.put("ErrCallCalInvalidTar",ErrCallCalInvalidTar);
+	//alertMap.put("SignWithPrivateKey",SignWithPrivateKey);
+	//alertMap.put("BrowserNotSupp",BrowserNotSupp);
+	//alertMap.put("UnRecognisedBrwser",UnRecognisedBrwser);
+	//alertMap.put("FormNotSigned",FormNotSigned);
+	//alertMap.put("TryLaterRepToAdm",TryLaterRepToAdm);
+	//alertMap.put("SigningAborted",SigningAborted);
+	//alertMap.put("CapicomNotInst",CapicomNotInst);
+	//alertMap.put("ContactAdmin",ContactAdmin);
+	//alertMap.put("CapicomNotRegd",CapicomNotRegd);
+	
+	/** 
+	 * Every error message array is mapped to an error code. These error 
+	 * codes are not taken from VERT table but kept for future reference.
+	 */
+	
+	alertMap.put(110000,NoMovieFound);
+	alertMap.put(110001,PinPadNotSup);
+	alertMap.put(110002,MinYearInputAbove);
+	alertMap.put(110003,SaveAndOpen);
+	alertMap.put(110004,LogOutIfOpened);
+	alertMap.put(110005,ErrSignFailed);
+	alertMap.put(110006,UnderScores);
+	alertMap.put(110007,SignFailReason);
+	alertMap.put(110008,BrowserNtJavaEn);
+	alertMap.put(110009,ExceedMaxLen);
+	alertMap.put(110010,OnlyUpperCase);
+	alertMap.put(110011,OnlyLowerCase);
+	alertMap.put(110012,ShouldBeAlphaNum);
+	alertMap.put(110013,ShouldBeNumeric);
+	alertMap.put(110014,ShouldBeAlphabets);
+	alertMap.put(110015,LessThanMinVal);
+	alertMap.put(110016,ExceedsMaxVal);
+	alertMap.put(110017,OnlyOneChar);
+	alertMap.put(110018,InValidChar_VALID_SET);
+	alertMap.put(110019,InValidChar_INVALID_SET);
+	alertMap.put(110020,InvInterpretMode);
+	alertMap.put(110021,AddMesgType);
+	alertMap.put(110022,InvalidAmount);
+	alertMap.put(110023,ExceedMaxAmt);
+	alertMap.put(110024,InvalidDateFormat);
+	alertMap.put(110025,InvalidHrsVal);
+	alertMap.put(110026,AllowedHrsRng);
+	alertMap.put(110027,InvalidMinutesVal);
+	alertMap.put(110028,AllowedMinutesRng);
+	alertMap.put(110029,InvalidSecondsVal);
+	alertMap.put(110030,OnlyUnsignIntAllowed);
+	alertMap.put(110031,ErrCallingCalendar);
+	alertMap.put(110032,ErrCallCalInvalidTar);
+	alertMap.put(110033,SignWithPrivateKey);
+	alertMap.put(110034,BrowserNotSupp);
+	alertMap.put(110035,UnRecognisedBrwser);
+	alertMap.put(110036,FormNotSigned);
+	alertMap.put(110037,TryLaterRepToAdm);
+	alertMap.put(110038,SigningAborted);
+	alertMap.put(110039,CapicomNotInst);
+	alertMap.put(110040,ContactAdmin);
+	alertMap.put(110041,CapicomNotRegd);
+	alertMap.put(110042,ExpandOrCollapse);
+	alertMap.put(110043,Expand);
+	alertMap.put(110044,Collapse);
+	alertMap.put(110045,LastWidget);
+	alertMap.put(110046,NoWidgets);
+	alertMap.put(110047,NoWidgetsTitle);
+	alertMap.put(110048,NoWidgetsAlt);
+	alertMap.put(110049,NoWidgetsImageSrc);
+	alertMap.put(110050,Select);
+	alertMap.put(110051,TitleForMinimize);
+	alertMap.put(110052,TitleForMaximize);
+	alertMap.put(110053,TitleForRefresh);
+	alertMap.put(110054,TitleForClose);
+	alertMap.put(110055,Refresh);
+	alertMap.put(110056,ErrorLoadingWidget);
+	/*For alt attribute*/	
+	alertMap.put(110057,AltForMinimize);
+	alertMap.put(110058,AltForMaximize);
+	alertMap.put(110059,AltForRefresh);
+	alertMap.put(110060,AltForClose);
+	alertMap.put(110061,Close);
+
+	alertMap.put(110062,SessionTimeoutMsg);
+	alertMap.put(110063,SessionExpiredMsg);
+	alertMap.put(110064,ReloginMsg);
+	alertMap.put(110065,SessionExpiringMsg);
+	alertMap.put(110066,Seconds);
+	alertMap.put(110067,ContinueSessionMsg);
+	alertMap.put(110068,SessionAlert);
+	alertMap.put(110069,GoToLoginPage);
+	alertMap.put(110070,comboBoxNoItemFoundMsg);
+	alertMap.put(110071,comboBoxShowAllButton);
+	alertMap.put(110072,timeout);
+	alertMap.put(110073,error);
+	alertMap.put(110074,abort);
+	alertMap.put(110075,parsererror);
+	alertMap.put(110076,fatal);
+	alertMap.put(110077,CacheInvalidationSuccess);
+	alertMap.put(110078,ErrorMessageTitle);
+	alertMap.put(110079,OneInformtnMessageTitle);
+	alertMap.put(110080,CacheInvalidationUnSuccess);
+	alertMap.put(110081,Host);
+	alertMap.put(110082,NoConfiguredWidgets);
+	alertMap.put(110083,ForPort);
+	alertMap.put(110084,All);
+	alertMap.put(110085,ScrollUp);
+	alertMap.put(110086,ScrollDown);
+	alertMap.put(110087,ExpandWidgetBar);
+	alertMap.put(110088,CollapseWidgetBar);
+    alertMap.put(110089,Continue_button);
+    alertMap.put(110090,Cancel_button);
+	/**
+	 * Error code and variable name mapping is done in this hash map.
+	 */
+	errCodeMap.put("NoMovieFound",110000);
+	errCodeMap.put("PinPadNotSup",110001);
+	errCodeMap.put("MinYearInputAbove",110002);
+	errCodeMap.put("SaveAndOpen",110003);
+	errCodeMap.put("LogOutIfOpened",110004);
+	errCodeMap.put("ErrSignFailed",110005);
+	errCodeMap.put("UnderScores",110006);
+	errCodeMap.put("SignFailReason",110007);
+	errCodeMap.put("BrowserNtJavaEn",110008);
+	errCodeMap.put("ExceedMaxLen",110009);
+	errCodeMap.put("OnlyUpperCase",110010);
+	errCodeMap.put("OnlyLowerCase",110011);
+	errCodeMap.put("ShouldBeAlphaNum",110012);
+	errCodeMap.put("ShouldBeNumeric",110013);
+	errCodeMap.put("ShouldBeAlphabets",110014);
+	errCodeMap.put("LessThanMinVal",110015);
+	errCodeMap.put("ExceedsMaxVal",110016);
+	errCodeMap.put("OnlyOneChar",110017);
+	errCodeMap.put("InValidChar_VALID_SET",110018);
+	errCodeMap.put("InValidChar_INVALID_SET",110019);
+	errCodeMap.put("InvInterpretMode",110020);
+	errCodeMap.put("AddMesgType",110021);
+	errCodeMap.put("InvalidAmount",110022);
+	errCodeMap.put("ExceedMaxAmt",110023);
+	errCodeMap.put("InvalidDateFormat",110024);
+	errCodeMap.put("InvalidHrsVal",110025);
+	errCodeMap.put("AllowedHrsRng",110026);
+	errCodeMap.put("InvalidMinutesVal",110027);
+	errCodeMap.put("AllowedMinutesRng",110028);
+	errCodeMap.put("InvalidSecondsVal",110029);
+	errCodeMap.put("OnlyUnsignIntAllowed",110030);
+	errCodeMap.put("ErrCallingCalendar",110031);
+	errCodeMap.put("ErrCallCalInvalidTar",110032);
+	errCodeMap.put("SignWithPrivateKey",110033);
+	errCodeMap.put("BrowserNotSupp",110034);
+	errCodeMap.put("UnRecognisedBrwser",110035);
+	errCodeMap.put("FormNotSigned",110036);
+	errCodeMap.put("TryLaterRepToAdm",110037);
+	errCodeMap.put("SigningAborted",110038);
+	errCodeMap.put("CapicomNotInst",110039);
+	errCodeMap.put("ContactAdmin",110040);
+	errCodeMap.put("CapicomNotRegd",110041);
+	errCodeMap.put("ExpandOrCollapse",110042);
+	errCodeMap.put("Expand",110043);
+	errCodeMap.put("Collapse",110044);
+	errCodeMap.put("LastWidget",110045);
+	errCodeMap.put("NoWidgets",110046);
+	errCodeMap.put("NoWidgetsTitle",110047);
+	errCodeMap.put("NoWidgetsAlt",110048);
+	errCodeMap.put("NoWidgetsImageSrc",110049);
+	errCodeMap.put("Select",110050);
+	errCodeMap.put("TitleForMinimize",110051);
+	errCodeMap.put("TitleForMaximize",110052);
+	errCodeMap.put("TitleForRefresh",110053);
+	errCodeMap.put("TitleForClose",110054);
+	errCodeMap.put("Refresh", 110055);
+	errCodeMap.put("ErrorLoadingWidget", 110056);
+	errCodeMap.put("AltForMinimize",110057);
+	errCodeMap.put("AltForMaximize",110058);
+	errCodeMap.put("AltForRefresh",110059);
+	errCodeMap.put("AltForClose",110060);
+	errCodeMap.put("Close",110061);
+
+	errCodeMap.put("SessionTimeoutMsg",110062);
+	errCodeMap.put("SessionExpiredMsg",110063);
+	errCodeMap.put("ReloginMsg",110064);
+	errCodeMap.put("SessionExpiringMsg",110065);
+	errCodeMap.put("Seconds",110066);
+	errCodeMap.put("ContinueSessionMsg",110067);
+	errCodeMap.put("SessionAlert",110068);
+	errCodeMap.put("GoToLoginPage",110069); 
+	errCodeMap.put("comboBoxNoItemFoundMsg",110070);
+	errCodeMap.put("comboBoxShowAllButton",110071);
+	errCodeMap.put("timeout",110072);
+	errCodeMap.put("error",110073);
+	errCodeMap.put("abort",110074);
+	errCodeMap.put("parsererror",110075);
+	errCodeMap.put("fatal",110076);
+	errCodeMap.put("CacheInvalidationSuccess",110077);
+	errCodeMap.put("ErrorMessageTitle",110078);
+	errCodeMap.put("OneInformtnMessageTitle",110079);
+	errCodeMap.put("CacheInvalidationUnSuccess",110080);
+	errCodeMap.put("Host",110081);
+	errCodeMap.put("NoConfiguredWidgets",110082);
+	errCodeMap.put("ForPort",110083);
+	errCodeMap.put("All",110084);
+	errCodeMap.put("ScrollUp",110085);
+	errCodeMap.put("ScrollDown",110086);
+	errCodeMap.put("ExpandWidgetBar",110087);
+	errCodeMap.put("CollapseWidgetBar",110088);
+	errCodeMap.put("Continue_button",110089);
+    errCodeMap.put("Cancel_button",110090);
+
+
+}
+

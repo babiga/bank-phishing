@@ -1,0 +1,595 @@
+/**
+ * NpageCustom.js
+ * The Container and Controller Object for all JavaScript objects
+ * It loads all other script files.It is loaded from FEBAScripts.js
+ * It contains objects to parse the Ajax response
+ *
+ * Created on Aug 16, 2011
+ * COPYRIGHT NOTICE:
+ * Copyright (c) 2004 Infosys Technologies Limited, Electronic City,
+ * Hosur Road, Bangalore - 560 100, India.
+ * All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Infosys Technologies Ltd. ("Confidential Information"). You shall
+ * not disclose such Confidential Information and shall use it only
+ * in accordance with the terms of the license agreement you entered
+ * into with Infosys.
+ */
+
+feba.js.custom={
+	//Format for page specific custom functions is viewId_onload
+	//Framework will automatically invoke the desired function for that page
+	UploadFileDetails_onload: function(){
+	feba.domManipulator.loadScript("scripts/module/fileupload/FileExtensionCheck.js");
+	},
+
+	CounterPartyUpload_onload: function(){
+	feba.domManipulator.loadScript("scripts/module/txnss/BNFFileExtensionCheck.js");
+	},
+
+	NewPayment_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	AuthenticationScreen_onload: function(){
+			writeCookie('bankId');
+	},
+	RMAuthenticationScreen_onload: function(){
+				writeCookie('bankId');
+	},
+	NewPaymentUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	DBTermDepositCalc_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewFundsTransfer_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewFundsTransferUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	NewFundTransferToOwnAccount_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	NewPaymentToPersonalPayee_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	NewPaymentToAdhocPayee_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	NewFundTransferToThirdParty_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	CreditCardPayment_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	InitiateBillPayment_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	LoanAccountPayment_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	PaymentToAdhocBiller_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	FundTransferOtherBankAccount_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+		PaymentToUnregisteredPayee_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+
+	PayYourBill_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+
+	},
+	NewCollection_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewCollectionUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	NewLoanRedraw_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewLoanRedrawUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	InitiateSingleEntryPaymentSummary_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	ModifyTransaction_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	ModifyTransactionUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	NewPeerToPeerPayment_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewPeerToPeerPaymentUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	NewPeerToPeerCollection_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	NewPeerToPeerCollectionUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	CopyTransaction_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	CopyTransactionUX3_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	AcceptTransaction_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	DeclineTransaction_onload: function(){
+		feba.js.common.displayWarning = "N";
+	},
+	ScheduledTransactionCorp_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/transaction/ScheduledTxnsFEBACalendar.js");
+		feba.domManipulator.documentReady(feba.useCase.scheduledTxnsFEBACalendar);
+	},
+	ScheduledTransactionRet_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/transaction/ScheduledTxnsFEBACalendar.js");
+		feba.domManipulator.documentReady(feba.useCase.scheduledTxnsFEBACalendar);
+	},
+	OpTransactionHistory_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/accounts/AcctTxnHistoryFEBACalendar.js");
+		feba.domManipulator.documentReady(feba.useCase.acctTxnHistoryFEBACalendar);
+	},
+	OpTransactionHistoryLstNTxn_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/accounts/AcctTxnHistoryFEBACalendar.js");
+		feba.domManipulator.documentReady(feba.useCase.acctTxnHistoryFEBACalendar);
+	},
+	OpTransactionHistoryTpr_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/accounts/AcctTxnHistoryFEBACalendar.js");
+		feba.domManipulator.documentReady(feba.useCase.acctTxnHistoryFEBACalendar);
+	},
+	OpAccountSummary_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/accounts/AccountSummaryPulldownMenu.js");
+		feba.domManipulator.documentReady(feba.useCase.accountSummaryPulldownMenu);
+	},
+	ViewSweepingStructures_onload: function(){
+			feba.domManipulator.loadScript("scripts/module/lqmg/LMSweepStructFEBACalendar.js");
+			feba.domManipulator.documentReady(feba.useCase.lmSweepStructFEBACalendar);
+	},
+	SweepingStructureModifyChild_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/lqmg/LQMG.js");
+	},
+	SweepingStructureCreateChild_onload: function(){
+		feba.domManipulator.loadScript("scripts/module/lqmg/LQMG.js");
+	},
+	AddCounterparty_onload: function(){
+		displayAdditional();
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	ModifyCounterparty_onload: function(){
+		displayAdditional();
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	CopyCounterparty_onload: function(){
+		displayAdditional();
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	BillerRegistrationUX3_onload: function(){
+		displayAdditional();
+		feba.domManipulator.loadScript("scripts/module/transaction/AutoPayAccount.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	ManageBillerEditUX3_onload: function(){
+		displayAdditional();
+		feba.domManipulator.loadScript("scripts/module/transaction/AutoPayAccount.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+	MailViewUX3_onload: function(){
+		feba.domManipulator.getElementStartingWith('MailsHomePageUX3_STATIC_MailView').bind('click', function() {
+		adjustDivHeight();
+		});
+	        convertComboboxes();
+	        adjustDivHeight();
+	        jQuery('.error_highlight').attr('style','float:left;width:78px;');
+	        jQuery('#LabelForControl15598565').attr('style','float:left;width:65px;padding-right:6px;');
+	},
+	MailCorpCompose_onload: function(){
+			jQuery('#LabelForControl20780199').attr('style','margin-left:4px;');
+
+			var label=document.getElementById('MailCompose_Stage313.Ra4.C2');
+			if (label.children[0].className=="simpletext"){
+				var removelabel=document.getElementById('MailCompose_Stage313.Ra5.C2');
+				removelabel.style.marginLeft="-7px";
+				var rowlabel=document.getElementById('MailCompose_Stage313.Ra4');
+				rowlabel.style.display="none";
+			}
+			else{
+				var removelabel=document.getElementById('MailCompose_Stage313.Ra5.C2');
+				removelabel.style.marginLeft="95px";
+				 var addcolor=document.getElementById('linkAttach');
+					if(addcolor.disabled){
+						addcolor.style.color="grey"
+					}
+			}
+	},
+	MailRetailCompose_onload: function(){
+			var label=document.getElementById('MailCompose_Stage313.Ra4.C2');
+			if (label.children[0].className=="simpletext"){
+				var removelabel=document.getElementById('MailCompose_Stage313.Ra5.C2');
+				removelabel.style.marginLeft="-7px";
+				var rowlabel=document.getElementById('MailCompose_Stage313.Ra4');
+				rowlabel.style.display="none";
+			}
+			else{
+				var removelabel=document.getElementById('MailCompose_Stage313.Ra5.C2');
+				removelabel.style.marginLeft="95px";
+				var addcolor=document.getElementById('linkAttach');
+				if(addcolor.disabled){
+					addcolor.style.color="grey"
+				}
+			}
+	},
+
+	MailsListUX3_onload: function(){
+		convertComboboxes();
+		adjustDivHeight();
+	},
+	EmptyMailViewUX3_onload: function(){
+		adjustEmptyDivHeight();
+	},
+	QuickLinkWidgetUX3_onload: function(){
+		convertComboboxes();
+	},
+	ViewDocumentsUX3_onload: function(){
+		convertComboboxes();
+	},
+	CashTransactionUpdateUX3_onload :  function(){
+		populateTransactionType();
+		populateWarning();
+	},
+	ContextualLinksWidget_onload: function(){
+		convertComboboxes();
+	},
+	FundTheGoal_onload: function(){
+		feba.js.common.displayWarning = "N";
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateFrequencyTypeCheck.js");
+		feba.domManipulator.loadScript("scripts/module/transaction/InitiateCounterpartyTypeCheck.js");
+		updateErrorMsgLocation("div","stage3_inputpanel_paydetailsrow");
+	},
+
+	RetailUserDashboard_onload: function(){
+
+	            //This function is for WidgetBar of Dashboard
+	            //'maxLinkedWidgetsLimit' is defined in PageMarguetag.java
+
+            feba.domManipulator.loadScript("scripts/module/applicationmaintenance/PageMaintenanceFunctions.js");
+
+	              if (document.createStyleSheet)
+	              {
+	                  document.createStyleSheet("L001/consumer/theme/jcarousel_styles.css");
+	              }
+	              else
+	              {
+                  feba.domManipulator.getElement('head').append('<link rel="stylesheet" href="L001/consumer/theme/jcarousel_styles.css" type="text/css" />');
+	              }
+            setTimeout(function(){
+            feba.domManipulator.getElementById("widgetListParent").jcarousel({heightWhenHidden:58,loadHidden:false,vertical:true,size:maxLinkedWidgetsLimit,scroll:1,itemFallbackDimension: 300,
+            						initCallback:function(){
+            jQuery(".jcarousel-item a img").css({'visibility':'visible'});
+        }});
+
+            },0);
+
+	            /* Widget Bar drag in drag out start*/
+	                  var widgetBarOpenCloseFlag = 1;
+	                  setTimeout(function(){
+                  feba.domManipulator.getElement('.jcarousel-skin-tango').hide();
+	                  },0);
+                  feba.domManipulator.getElementById("widgetBar_pullbtn").click(function(){
+	                        if(widgetBarOpenCloseFlag==2){
+                              feba.domManipulator.getElementById('widgetBar_outer').addClass('widgetBar_outer_close');
+                              feba.domManipulator.getElementById('widgetBar_outer').removeClass('widgetBar_outer_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').addClass('widgetBar_pullbtn_close');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').removeClass('widgetBar_pullbtn_open');
+	                              widgetBarOpenCloseFlag=1;
+                              feba.domManipulator.getElement('.jcarousel-skin-tango').hide();
+							  feba.domManipulator.getElement('.jcarousel-skin-tango').addClass('hideElement');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('src',imagePath+'/widgetBar_btn.png');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('title',getMessage("ExpandWidgetBar"));
+
+	                              return;
+	                        }
+	                        if(widgetBarOpenCloseFlag==1){
+                              feba.domManipulator.getElementById('widgetBar_outer').removeClass('widgetBar_outer_close');
+                              feba.domManipulator.getElementById('widgetBar_outer').addClass('widgetBar_outer_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').addClass('widgetBar_pullbtn_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').removeClass('widgetBar_pullbtn_close');
+	                              widgetBarOpenCloseFlag=2;
+                              feba.domManipulator.getElement('.jcarousel-skin-tango').show();
+							  feba.domManipulator.getElement('.hideElement').removeClass('hideElement');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('src',imagePath+'/widgetBar_btn_reverse.png');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('title',getMessage("CollapseWidgetBar"));
+			      			jQuery('.jcarousel-prev').attr('title',getMessage("ScrollUp"));
+	      					jQuery('.jcarousel-next').attr('title',getMessage("ScrollDown"));
+	                              return;
+	                        }
+
+	                  });
+
+
+	            /* End */
+
+	      },
+	CorporateUserDashboard_onload: function(){
+
+	            //This function is for WidgetBar of Dashboard
+	            //'maxLinkedWidgetsLimit' is defined in PageMarguetag.java
+
+            feba.domManipulator.loadScript("scripts/module/applicationmaintenance/PageMaintenanceFunctions.js");
+
+	              if (document.createStyleSheet)
+	              {
+	                  document.createStyleSheet("L001/consumer/theme/jcarousel_styles.css");
+	              }
+	              else
+	              {
+                  feba.domManipulator.getElement('head').append('<link rel="stylesheet" href="L001/consumer/theme/jcarousel_styles.css" type="text/css" />');
+	              }
+            setTimeout(function(){
+            feba.domManipulator.getElementById("widgetListParent").jcarousel({heightWhenHidden:58,loadHidden:false,vertical:true,size:maxLinkedWidgetsLimit,scroll:1,itemFallbackDimension: 300,
+            						initCallback:function(){
+            jQuery(".jcarousel-item a img").css({'visibility':'visible'});
+        }});
+
+            },0);
+
+	            /* Widget Bar drag in drag out start*/
+	                  var widgetBarOpenCloseFlag = 1;
+	                  setTimeout(function(){
+                  feba.domManipulator.getElement('.jcarousel-skin-tango').hide();
+	                  },0);
+                  feba.domManipulator.getElementById("widgetBar_pullbtn").click(function(){
+	                        if(widgetBarOpenCloseFlag==2){
+                              feba.domManipulator.getElementById('widgetBar_outer').addClass('widgetBar_outer_close');
+                              feba.domManipulator.getElementById('widgetBar_outer').removeClass('widgetBar_outer_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').addClass('widgetBar_pullbtn_close');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').removeClass('widgetBar_pullbtn_open');
+	                              widgetBarOpenCloseFlag=1;
+                              feba.domManipulator.getElement('.jcarousel-skin-tango').hide();
+							  feba.domManipulator.getElement('.jcarousel-skin-tango').addClass('hideElement');
+
+				  feba.domManipulator.getElement('.widgetBar_btn_span').attr('src',imagePath+'/widgetBar_btn.png');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('title',getMessage("ExpandWidgetBar"));
+
+	                              return;
+	                        }
+	                        if(widgetBarOpenCloseFlag==1){
+                              feba.domManipulator.getElementById('widgetBar_outer').removeClass('widgetBar_outer_close');
+                              feba.domManipulator.getElementById('widgetBar_outer').addClass('widgetBar_outer_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').addClass('widgetBar_pullbtn_open');
+                              feba.domManipulator.getElementById('widgetBar_pullbtn').removeClass('widgetBar_pullbtn_close');
+	                              widgetBarOpenCloseFlag=2;
+                              feba.domManipulator.getElement('.jcarousel-skin-tango').show();
+							  feba.domManipulator.getElement('.hideElement').removeClass('hideElement');
+feba.domManipulator.getElement('.widgetBar_btn_span').attr('src',imagePath+'/widgetBar_btn_reverse.png');
+			      feba.domManipulator.getElement('.widgetBar_btn_span').attr('title',getMessage("CollapseWidgetBar"));
+			      			jQuery('.jcarousel-prev').attr('title',getMessage("ScrollUp"));
+	      					jQuery('.jcarousel-next').attr('title',getMessage("ScrollDown"));
+	                              return;
+	                        }
+
+	                  });
+
+
+	            /* End */
+
+	      },
+	 FinanceOverviewHomePageUX3_onload: function(){
+			document.getElementById("CATEGORY_WISE_LIST").disabled=true;
+			document.getElementById("CATEGORY_WISE_LIST").className = "formbtn_finaceovervw";
+			document.getElementById("CATEGORY_WISE_LIST").parentNode.className ="HW_formbtn_financeovervw_grey";
+
+	},
+	 BudgetHomepageListUX3_onload: function(){
+			incomeButtonDisable();
+			expenseButtonDisable();
+
+	},
+	 GoalLinkAccounts_onload: function(){
+			document.getElementById("reqNewBtn").disabled=true;
+			document.getElementById("reqNewBtn").className = "formbtn_finaceovervw";
+			document.getElementById("reqNewBtn").parentNode.className ="HW_formbtn_lnkaccnt";
+			document.getElementById("GoalAccountLinkFG.GEN_ACCOUNT_ID").disabled = true;
+
+	},
+
+
+	ASBAPreferences_onload: function(groupletId){
+		//Fix for TOL: 437260 Starts
+		var obj2 = document.getElementById('InputForm1.Ra2');
+		var obj3 = document.getElementById('InputForm1.Ra3');
+		var obj4 = document.getElementById('InputForm1.Ra4');
+		var depCode = document.getElementById('CorpAdminFWFG.DEPOSITORY_CODE');
+		var depCodeValaue = depCode.options[depCode.selectedIndex].value;
+		if(depCodeValaue == "CDSL"){
+			obj2.style.display="none";
+			obj3.style.display="none";
+			obj4.style.display="block";
+		}else if (depCodeValaue == "NSDL"){
+			obj2.style.display="block";
+			obj3.style.display="block";
+			obj4.style.display="none";
+		}else{
+			obj2.style.display="block";
+			obj3.style.display="block";
+			obj4.style.display="block";
+		}
+		//Fix for TOL: 437260 Ends
+	feba.domManipulator.loadScript("scripts/module/ipo/nASBAFunctions.js");
+		feba.domManipulator.documentReady(feba.js.ipo.ASBAPreferences, groupletId);
+	},
+	IPOSubscription_onload: function(groupletId){
+	  	feba.domManipulator.loadScript("scripts/module/ipo/nIpoFunctions.js");
+			feba.domManipulator.documentReady(feba.js.ipo.IPOBidType, groupletId);
+
+	},
+	IPORevision_onload: function(groupletId){
+	  	feba.domManipulator.loadScript("scripts/module/ipo/nIpoFunctions.js");
+			feba.domManipulator.documentReady(feba.js.ipo.IPOBidType, groupletId);
+
+	},
+
+	AddEmployee_onload: function() {
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+
+	CopyEmployee_onload: function() {
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+
+	ModifyEmployee_onload: function() {
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	BillerRegistration_onload: function() {
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	ManageBillerEdit_onload: function() {
+		feba.domManipulator.loadScript("scripts/module/txnss/NTxnssMaxAmtLimit.js");
+	},
+	InitiateMobileRechargePayment_onload: function(groupletId){
+        	feba.domManipulator.loadScript("scripts/module/transaction/NTopUpListPopulator.js");
+            feba.domManipulator.documentReady(feba.js.transaction.topUpListPopulator, groupletId  );
+    },
+    CorpSnapShot_onload: function(){
+		feba.js.common.configurable_Widget_Present = "N";
+	},
+	AuthorizationScheme_onload: function(){
+		feba.domManipulator.getElementStartingWith('AuthSchemeMaintenanceFG.TXN_TYPE').bind('change', function() {
+			getFunctionCodeDetails();
+			});
+	},
+
+
+	WidgetsLibrary_onload: function(){
+			feba.domManipulator.loadScript("scripts/module/applicationmaintenance/PageMaintenanceFunctions.js");
+				// This function is for clearing the check boxes on the widget Library page
+
+				feba.domManipulator.getElementEndingWith('CLEAR_ALL_CHECKBOXES').bind('click', function() {
+			var checkBoxElements=feba.domManipulator.getElement(':checkbox');
+				// function call to hide search panel
+				hideSearchPanel(this);
+	 			//feba.domManipulator.getElementEndingWith('CLEAR_ALL_CHECKBOXES').parent().parent().hide();
+			 	//Get the checkbox elements size
+			 	var checkBoxLen=checkBoxElements.length;
+
+			 	//Iterate through the checkboxes and add event listener for click event
+			 	for(var index=0;index<checkBoxLen;index++){
+
+		 		feba.domManipulator.getElement(checkBoxElements[index]).removeAttr('checked');
+
+		 		feba.domManipulator.getElement(checkBoxElements[index]).checked=false;
+
+			 	}
+
+	         });
+
+	}
+
+
+};
+
+feba.js.module={
+crpadmin_onload : function(groupletId){
+		feba.domManipulator.loadScript("scripts/module/crpadmin/NAccessScript.js");
+	},
+DirectBanking_onload : function(groupletId){
+		feba.domManipulator.loadScript("scripts/module/DirectBanking/NAC_OETags.js");
+		feba.domManipulator.loadScript("scripts/module/DirectBanking/NDepositCalculator.js");
+		feba.domManipulator.loadScript("scripts/module/DirectBanking/Njson.js");
+		feba.domManipulator.loadScript("scripts/module/DirectBanking/NSavingsCalculator.js");
+		feba.domManipulator.loadScript("scripts/module/DirectBanking/Nutils.js");
+	},
+mufu_onload : function(groupletId){
+		feba.domManipulator.loadScript("scripts/module/mufu/NMFScript.js");
+		feba.domManipulator.loadScript("scripts/module/mufu/NMFSwitchScript.js");
+	},
+servicerequest_onload : function(groupletId){
+		feba.domManipulator.loadScript("scripts/module/servicerequest/NfnScript.js");
+	},
+transaction_onload : function(groupletId){
+		feba.domManipulator.loadScript("scripts/module/transaction/NPFTotalAmountCalculator.js");
+	}
+
+
+};

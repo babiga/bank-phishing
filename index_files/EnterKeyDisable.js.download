@@ -1,0 +1,8 @@
+function killEnter(evt) {
+	
+	if (evt.keyCode == 13 || evt.which == 13) {
+	
+		evt.preventDefault();
+	}
+	
+}

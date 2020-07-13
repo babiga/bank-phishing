@@ -1,0 +1,1903 @@
+//-------------------------------------------------------------------
+//This JQuery function is created to call JavaScript functions
+// on document.ready event, from all JSPs
+//-------------------------------------------------------------------
+var sessionWindow = null;//stores the handle to session alert popup added here sothat session window can be closed on browser tab closed.
+
+jQuery(document).ready(function () {
+    //Add list of JavaScript functions which are required to be called on document.ready event
+    // Function to highlight error rows
+    window.onunload = function () {
+        if (sessionWindow && !sessionWindow.closed) {
+            sessionWindow.close();
+        } else {
+        }
+        return true;
+    };
+    highLightErrorRow();
+    highLightErrorField();
+    var dateFieldText;
+    var dateFieldElement;
+    var isDateIconClicked;
+
+    // This function prevents the default action of buttons if there is type system error in any field
+    jQuery(":submit").click(function (event) {
+        var element = document.getElementsByTagName('input');
+        for (var j = 0; j < element.length; j++) {
+            // if the id matches to the type system hidden field, prevent the default action of buttons
+            if ((element[j].id.match(/^ERROR_HIDDEN_ROW_/)) || (element[j].id.match(/^ERROR_HIDDEN_FIELD_/))) {
+                event.preventDefault();
+            }
+        }
+        if (Constants.TRUE === feba.domManipulator.getAttribute(event.target, "data-isDownloadButton")) {
+            feba.domManipulator.setAttribute(feba.domManipulator.getElement("form"), "isDownloadAction", "true");
+        }
+    });
+    /**Start Investec CR104 for Error Highlighting**/
+        //Gets the text from a textbox in case of focus in
+    var originalText;
+    jQuery('input[type="text"]').focusin(function () {
+        originalText = jQuery(this).val();
+        originalText = jQuery.trim(originalText);
+    });
+    //Checks if the text has changed in the textbox at focus out, then change the border color of this field
+    jQuery('input[type="text"]').focusout(function () {
+        newText = jQuery(this).val();
+        newText = jQuery.trim(newText);
+        if (originalText != newText) {
+            changeFieldBorderColor(this);
+        }
+    });
+
+    //Checks if there is change in the combo box's selected value, then change the border color of this field
+    jQuery('select').change(function () {
+        changeFieldBorderColor(this);
+    });
+
+    //When the current window gets focus, if there is some Business exception
+    //of date field corrected using date picker then change the respective
+    //field's border
+    jQuery(window).focus(function () {
+        if (isDateIconClicked) {
+            if (isDateChanged(dateFieldElement, dateFieldText)) {
+                changeFieldBorderColor(dateFieldElement);
+            }
+            isDateIconClicked = false;
+        }
+    });
+
+    //If an image with id containing FG is clicked and that image is inside a table and its nth level span
+    //(going upwards towards the td - select last span which is also the parent of image)
+    //has class ERROR_FIELD_BORDER (means there is a Business exception on this date field)
+    //then set isDateIconClicked to true and store current date field's value to dateFieldText
+    jQuery('img[id*="FG"]').click(function () {
+        var tableElem = jQuery(this).closest('table');
+        if (tableElem.html() != null) {
+            var elems = jQuery(this).parentsUntil("td");
+            var nLevelSpan = elems[elems.length - 1];
+            if (jQuery(nLevelSpan).hasClass('ERROR_FIELD_BORDER')) {
+                isDateIconClicked = true;
+                var parentSpan = jQuery(this).parent().parent();
+                var field = jQuery(parentSpan).children(":first");
+                dateFieldText = jQuery(field).val();
+                dateFieldText = jQuery.trim(dateFieldText);
+                dateFieldElement = field;
+            }
+        }
+    });
+    /**End Investec CR104 for Error Highlighting**/
+});
+
+//-------------------------------------------------------------------
+//This function checks if the date in dateFieldElement is changed 
+//and returns an appropriate flag value
+//-------------------------------------------------------------------
+
+function isDateChanged(dateFieldElement, dateFieldText) {
+    var dateChanged = false;
+    newDateFieldText = jQuery(dateFieldElement).val();
+    newDateFieldText = jQuery.trim(newDateFieldText);
+    if (dateFieldText != newDateFieldText) {
+        dateChanged = true;
+    }
+    return dateChanged;
+}
+
+/** Start Pop-up Bubble in case of field's inside table component - Investec CR86**/
+
+//-------------------------------------------------------------------
+//This function hides the pop-up bubble
+//-------------------------------------------------------------------
+
+function hideBubble() {
+    var bubbleDivs = jQuery('div[id*="bubbleID_"]');
+    var elemsToBeRemoved = new Array();
+    var count = 0;
+    for (var j = 0; j < bubbleDivs.length; j++) {
+        if (!jQuery(bubbleDivs[j]).next().hasClass('ERROR_FIELD_BORDER_TYPESYS')) {
+            jQuery(bubbleDivs[j]).remove();
+        }
+    }
+}
+
+//-------------------------------------------------------------------
+//This function shows the pop-up bubble with error for element with class mouseoverClass
+//Parameters:
+//		mouseoverClass is the class name of the highlighted element
+//-------------------------------------------------------------------
+
+function showBubble(mouseoverClass, errorContent) {
+    var highlightedElem = jQuery("." + mouseoverClass);
+    var position = highlightedElem.offset();
+    if (position != null) {
+        var tPosX = (position.left - 100) + 'px';
+        var tPosY = (position.top - 80) + 'px';
+        //Added random number for error filed in order to not to violate the unique id standards			
+        var number = 1 + Math.floor(Math.random() * 600);
+        jQuery(highlightedElem).before('<div id=\"bubbleID_' + number + '\" style="top:' + tPosY + '; left:' + tPosX + '; position: absolute; display: inline; border: 2px; width: 300px; height: auto; background-color: pink;padding-top:10px;padding-bottom:10px; padding-right:10px;padding-left:10px;">' + errorContent + '<input type=hidden id=\"ERROR_HIDDEN_FIELD_' + number + '\" value=\"ROW\"></div>');
+    }
+}
+
+/** End Pop-up Bubble in case of field's inside table component - Investec CR86 **/
+function sendAlert() {
+    var fgName = document.getElementsByName("FORMSGROUP_ID__")[0].value;
+    sendAlert(fgName);
+}
+
+//This method will be called directly for downloads in grouplets
+function sendAlert(fgName) {
+
+    if (!fgName) {
+
+        fgName = document.getElementsByName("FORMSGROUP_ID__")[0].value;
+
+    }
+    var selected = document.getElementById(fgName + ".OUTFORMAT").value;
+    if (selected == 1 || selected == 2 || selected == 8 || selected == 11) {
+        var msg = getMessage("SaveAndOpen");
+        msg = msg + " \n";
+        msg = msg + getMessage("LogOutIfOpened");
+        alert(msg);
+    }
+}
+
+function enableCntrlDetails() {
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var select = document.getElementById(fgName + ".CONTROL").value;
+    if (select != "CBO" && select != "LKP") {
+        document.getElementById(fgName + ".CONTROL_DETAILS").value = "";
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = true;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+    }
+    else {
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = false;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+        document.ReportsDesignFG.__EVENT_ID__.disabled = false;
+        document.ReportsDesignFG.__EVENT_ID__.value = "LOAD_CONTROL_DETAILS";
+        document.ReportsDesignFG.submit();
+    }
+}
+
+function getAdditionalControlDetails() {
+    document.ReportsDesignFG.__EVENT_ID__.disabled = false;
+    document.ReportsDesignFG.__EVENT_ID__.value = "LOAD_ADDITIONAL_CONTROL_DETAILS";
+    document.ReportsDesignFG.submit();
+}
+
+function enableReportName() {
+
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var manualJrxml = document.getElementById(fgName + ".MANUAL_JRXML");
+    var manualJsp = document.getElementById(fgName + ".MANUAL_JSP");
+    if (manualJrxml.checked || manualJsp.checked) {
+        document.getElementById(fgName + ".REPORT_NAME").disabled = false;
+    }
+    else {
+        document.getElementById(fgName + ".REPORT_NAME").value = "";
+        document.getElementById(fgName + ".REPORT_NAME").disabled = true;
+    }
+}
+
+function getControlDetails() {
+    var controlDesc = new Array();
+    var controlValue = new Array();
+
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var selCri = document.getElementById(fgName + ".DISPLAY_SECTION").value;
+    var select = document.getElementById(fgName + ".CONTROL");
+    if (select.options.length > 1) {
+        for (var i = 0; i < select.options.length; i++) {
+            controlDesc[i] = select.options[i].text;
+            controlValue[i] = select.options[i].value;
+        }
+    }
+
+    if (selCri == "O" || selCri == "B") {
+
+        select.options.length = 1;
+        select.options[0] = new Option('CheckBox', 'CHK');
+        document.getElementById(fgName + ".CONTROL_DETAILS").value = "";
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = true;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+
+    }
+    else {
+        select.options.length = controlDesc.length;
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = false;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+        for (var i = 0; i < controlDesc.length; i++) {
+            select.options[i] = new Option(controlDesc[i], controlValue[i]);
+        }
+    }
+
+
+}
+
+function getPaymentDetails(cpType) {
+    var fgName = document.getElementsByName("FORMSGROUP_ID__")[0].value;
+    var selectedBnfValue = document.getElementById(fgName + ".DESTINATION_DETAILS_STRING_" + cpType).value;
+    var bnfValuesList = selectedBnfValue.split('/');
+    var paymentDetailsEntity = bnfValuesList[5];
+    if (paymentDetailsEntity == undefined) {
+        document.getElementById(fgName + ".BENEFICIARY_REFERENCE").value = "";
+    }
+    else {
+        var paymentDetailsKeyValArray = paymentDetailsEntity.split(':');
+        var paymentDetails = paymentDetailsKeyValArray[1];
+        document.getElementById(fgName + ".BENEFICIARY_REFERENCE").value = paymentDetails;
+    }
+}
+
+function enableCntrlDetails() {
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var select = document.getElementById(fgName + ".CONTROL").value;
+    if (select != "CBO" && select != "LKP") {
+        document.getElementById(fgName + ".CONTROL_DETAILS").value = "";
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = true;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+    }
+    else {
+        document.getElementById(fgName + ".CONTROL_DETAILS").disabled = false;
+        document.getElementById(fgName + ".ADDITIONAL_CONTROL_DETAILS").value = "";
+        document.ReportsDesignFG.__EVENT_ID__.disabled = false;
+        document.ReportsDesignFG.__EVENT_ID__.value = "LOAD_CONTROL_DETAILS";
+        document.ReportsDesignFG.submit();
+    }
+}
+
+function getAdditionalControlDetails() {
+    document.ReportsDesignFG.__EVENT_ID__.disabled = false;
+    document.ReportsDesignFG.__EVENT_ID__.value = "LOAD_ADDITIONAL_CONTROL_DETAILS";
+    document.ReportsDesignFG.submit();
+}
+
+/**
+ * Utility method to determine if a grouplet has invoked the function
+ * */
+function isGrouplet(id) {
+    //TODO Move hardcoded value to a shared constant
+    if (id.indexOf(":") == -1) {
+        return false;
+    } else return true;
+}
+
+/*
+ * This method will load an rich text editor
+ * id - The id attribute value of the text area component
+ * imgPath - The images folder path
+ */
+function loadRichTextEditor(id, imgPath) {
+
+    var oHeight = feba.domManipulator.getElementById(id).css("height");
+    var oWidth = feba.domManipulator.getElementById(id).css("width");
+    var textArea = feba.domManipulator.getElementById(id);
+    var editor = textArea.cleditor({
+        height: oHeight, width: oWidth, imagePath: imgPath,
+        controls: "bold italic underline | font size " +
+        "style | color highlight | bullets numbering | undo redo | " +
+        "rule link unlink | cut copy paste pastetext |"
+    });
+    feba.domManipulator.addData(textArea, 'editor', editor[0]);
+
+}
+
+/**
+ * this method is used to reset the rich text editor frame
+ * @param textAreaId
+ * @param groupletId
+ */
+function resetRichTextEditor(textAreaId, groupletId) {
+    feba.domManipulator.documentReady(function () {
+
+        var resetButtons = getResetButtons(groupletId);
+        var textArea = feba.domManipulator.getElementById(textAreaId);
+        feba.domManipulator.click(resetButtons, function () {
+            feba.domManipulator.val(textArea, '');
+            var editor = feba.domManipulator.getData(textArea, 'editor');
+            editor.updateFrame();
+        });
+    });
+}
+
+//Code change for FNEB10.3_CR74 - Session time out starts here
+function sessionTimer(cssURL1, usertype) {
+
+    var sessionExpireTime = 0;//stores the time to show the Session alert popup
+    //var sessionWindow=null; commented added gloably to handle session window close event.
+    var sessionHdrTimerID = null;//stores the timer identifier for Header Text Session timeout value
+    var sessionPopupTimerID = null;//Stores the timer identifier for Session alert popup
+
+    var sessionExpiredMsg = getMessage("SessionExpiredMsg");
+    var reloginMsg = getMessage("ReloginMsg");
+    var sessionExpiringMsg = getMessage("SessionExpiringMsg");
+    var secMsg = getMessage("Seconds");
+    var continuesessionMsg = getMessage("ContinueSessionMsg");
+    var expiringMsg = getMessage("SessionTimeoutMsg");
+    var sessionAlertMsg = getMessage("SessionAlert");
+    var goToLoginPageMsg = getMessage("GoToLoginPage");
+    var Continue_button = getMessage("Continue_button");
+    var Cancel_button = getMessage("Cancel_button");
+
+    /*
+     * This method will give time in hrs : minutes format
+     * @param seconds, input time in seconds
+     */
+    this.getSecondsLeft = function (seconds) {
+        var hours = 0;
+        var minutes = 0;
+        //Calculate the hours left to show it in page header
+        if (seconds > 3600) {
+
+            hours = parseInt(seconds / 3600);
+        }
+        //Calculate the minutes left to show it in page header
+        if (seconds >= 60) {
+            minutes = parseInt((seconds - hours * 3600) / 60);
+        }
+        //Calculate the seconds left to show it in page header
+        seconds = seconds - (hours * 3600) - (minutes * 60);
+        return hours + " hrs: " + minutes + " mins";
+    };
+
+    /*
+     * This method will start timer for page header and session alert popup
+     */
+    this.start = function () {
+        var timerVal = Number(document.getElementById("sessionAlertTime").value);
+        var sessionTimeout = Number(document.getElementById("sessionTimeout").value);
+        //Check for invalid session alert configuration details
+        if (timerVal <= 0 || timerVal >= sessionTimeout) {
+            //session timeout and alert interval variables are wrongly configuration
+            return;
+        }
+        sessionExpireTime = sessionTimeout - timerVal;
+
+
+        //Dynamically insert an text to show the session timeout value
+        var oNode = document.getElementById("sessionTimeoutText");
+        oNode.innerHTML = "<label id='sessionExpiryTime'>" + this.getSecondsLeft(sessionTimeout) + "</label>";
+
+        //start the timer for page header timeout text
+        sessionHdrTimerID = setInterval("this.updateHeaderTime()", 60000);
+
+        //start the timer for Session alert timeout text
+        sessionPopupTimerID = setInterval("this.showSessionExpiredPopup()", 1000);
+    }
+
+    /*
+     * This method updates the page header countdown timer for session timeout value
+     */
+    this.updateHeaderTime = function () {
+        var sec = Number(document.getElementById("sessionTimeout").value);
+
+        //Decrement by 60, since the timer is configured for every 60 seconds
+        sec = sec - 60;
+
+        document.getElementById("sessionExpiryTime").childNodes[0].nodeValue = this.getSecondsLeft(sec);
+
+        //reset the session timeout value
+        document.getElementById("sessionTimeout").value = sec;
+
+        //Show the Session alert popup when the session expires.
+        if (sec != 0 && sec < 60) {
+            clearInterval(sessionHdrTimerID);
+            mSec = sec * 1000;
+            sessionHdrTimerID = setInterval("this.showExpiredPopup()", mSec);
+        }
+        if (sec == 0) {
+            //Call the showExpiredPopup method to inform user that the sesion got expired.
+            this.showExpiredPopup();
+        }
+    };
+
+    /*
+     * This method will show a session expired popup with login button (Displayed after session expires)
+     */
+    this.showExpiredPopup = function () {
+        //Clear the timer for page header
+        clearInterval(sessionHdrTimerID);
+        if (sessionWindow != null && sessionWindow.closed) {
+            //Popup window is closed before session expired message is displayed. So, opening it again.
+
+            //Create the Session alert popup
+            var doc = this.createSessionPopupDoc();
+
+            //Hide irrevalent sections
+            var str = "<script>";
+            str += "document.getElementById('rowID1').style.display='';";
+            str += "document.getElementById('rowID2').style.display='none';";
+            str += "document.getElementById('rowID3').style.display='none';";
+            str += "window.onunload = function () { document.getElementById('gotoLoginImg').click(); } ";
+            str += "</script>";
+
+            //Write to the session popup window
+            doc.write(str);
+            doc.close();
+        }
+    };
+
+    /*
+     * This method shows a session expired popup
+     * The popup will be shown only when the configured alert interval is reached.
+     */
+    this.showSessionExpiredPopup = function () {
+        sessionExpireTime--;
+
+        //Show the Session popup only when the timer reaches 0
+        if (sessionExpireTime != 0) {
+            return;
+        }
+
+        clearInterval(sessionPopupTimerID);
+        //Create the Session alert popup
+        var doc = this.createSessionPopupDoc();
+        //Hide irrevalent sections and start countdown timer
+        //Changes done solving IE8 popup issue
+        var str;
+        //window.setTimeout(function () {
+
+        str = "<script>";
+        str += "function updateTime() {";
+        str += "	if (timerVal == 0) {";
+        str += "		clearInterval(timerID); ";
+        str += "		document.getElementById('rowID1').style.display='';";
+        str += "		document.getElementById('rowID2').style.display='none';";
+        str += "		document.getElementById('rowID3').style.display='none';";
+        str += "		window.onunload = function () { document.getElementById('gotoLoginImg').click(); }; ";
+        str += "		window.focus();";
+        str += "	} else {";
+        str += "		timerVal--;";
+        str += "		document.getElementById('secLabel').childNodes[0].nodeValue=timerVal;";
+        str += "	}";
+        str += "}";
+        str += "var timerVal=window.opener.document.getElementById('sessionAlertTime').value;";
+        //str += "timerVal=(timerVal)*60;";
+        str += "document.getElementById('secLabel').childNodes[0].nodeValue=timerVal;";
+        str += "var timerID=setInterval('updateTime()',1000);";
+        str += "</script>";
+
+        //Write the newly created script to the Session popup window
+        doc.write(str);
+        //},400);
+        doc.close();
+    };
+
+    /*
+     * This method is used to show a session alert popup
+     * using dynamically created HTML content
+     */
+    this.createSessionPopupDoc = function () {
+        //Open an empty popup for showing session alert
+        //Changes done solving IE8 popup issue
+        var features = "width=420,cellpadding=0,cellspacing=0,dialog=yes,toolbar=no,menubar=no,height=220,status=no,location=0,resizable=no,left=500,top=265,dependent=1,alwaysRaised=1,title=0";
+        sessionWindow = window.open("", "", features);
+        var doc = sessionWindow.document;
+        var sessionImgPath = document.getElementById('sessionImgPath').value;
+        var sessionLoginURL = document.getElementById('sessionLoginURL').value;
+        //Changes done solving IE8 popup issue
+        var str;
+        doc.write("<html><head><title>Session Alert</title><link href='" + cssURL1 + "' rel='stylesheet' type='text/css'>");
+        //Added As part of 11.0.6 Enhancement START
+        doc.write("<script type='text/javascript'>window.onbeforeunload = function(){window.opener.showParentWindow();}</script>");
+        doc.write("<script type='text/javascript' src='" + feba.scriptsPath + "/common/NcookieScript.js'></script></head>");
+        //Added As part of 11.0.6 Enhancement END
+
+        // Removed Common theme inclusion
+//		window.setTimeout(function () {
+        str += "</head>";
+        str = "<body class='popupDimension'>";
+        str += "<div id='sessionPopup'>	";
+        str += "<div id='sessionPopupTitle'>";
+        str += sessionAlertMsg;
+        str += "</div>";
+        str += "<div id='sessAlertTable'>";
+        str += "<table id='sessionTable' width='100%'>";
+        str += "<tr id='rowID1' style='display:none' align='center'>";
+        str += "<td colspan='2' align='center'>";
+        str += "<table width='100%' class='sessionTable'>";
+        str += "<tr align='left'>";
+        str += "<td align='left' colspan='2' class='sessionExpiredRow'>" + sessionExpiredMsg + "</td>";
+        str += "</tr>";
+        str += "<tr align='left'>";
+        str += "<td align='left' colspan='2' class='reloginMsgRow'>" + reloginMsg + "<br /><br/></td>";
+        str += "</tr>";
+        // Added for Ebux-3 header changes
+        if (usertype != 4) {
+            str += "<tr align='right'>";
+            str += "<td colspan='2'>";
+            str += "<br/><input type='button' value='" + goToLoginPageMsg + "'  class='btn btn-blue margin5' onclick='window.close();window.opener.goToLoginPage(\"" + sessionLoginURL + "\");' />";
+            str += "</td>";
+            str += "</tr>";
+        } else {
+            str += "<tr align='center'>";
+            str += "<td colspan='2'>";
+            str += "<br/><br/><img src='" + sessionImgPath + "' alt='" + goToLoginPageMsg + "' title='" + goToLoginPageMsg + "' id='gotoLoginImg' border='0' onclick='window.close();window.opener.goToLoginPage(\"" + sessionLoginURL + "\");' />";
+            str += "</td>";
+            str += "</tr>";
+        }
+        str += "</table>";
+        str += "</td>";
+        str += "</tr>";
+        str += "<tr id='rowID2' align='center'>";
+        str += "<td colspan='2'>";
+        str += "<table width='100%'>";
+        str += "<tr align='left'><td align='left' class='sessionExpiredRow'>" + sessionExpiringMsg + "<label id='secLabel'>0</label>" + secMsg + "</td></tr>";
+        str += "<tr align='left'><td align='left' class='reloginMsgRow'>" + continuesessionMsg + "</td></tr>";
+        str += "</table>";
+        str += "</td>";
+        str += "</tr>";
+        // Added for Ebux-3 header changes
+        if (usertype != 4) {
+            str += "<tr><td><br /></td></tr>";
+            str += "<tr id='rowID3' align='right'>";
+            str += "<td style='border-top:1px solid #E4E4E4;'><br /><span class='HW_continue_session'>";
+
+                str += "<input type='button' id='continue_session_btn' value='" + Continue_button + "' class='btn btn-blue margin5' onclick='window.close();window.opener.resetSession();'></span>";
+                str += "<span style='display:inline;'><input id='close_btn' class='close_btn btn btn-blue margin5' type='button' value='" + Cancel_button + "' onclick='window.close();'></span><br /></td>";
+            str += "</tr>";
+        } else {
+            str += "<tr id='rowID3' align='right'>";
+            str += "<td><br /><br />";
+            str += "<input type='button' id='continue_session_btn' value='Continue Session' onclick='window.close();window.opener.resetSession();' class='btn'></td>";
+            str += "<td align='center'><br /><br /><input id='close_btn' class='close_btn' type='button' value='Close' onclick='window.close();' class='btn'></td>";
+            str += "</tr>";
+        }
+        str += "</table>";
+        str += "</div>";
+        str += "</div>";
+        str += "</body>";
+        str += "</html>";
+        //Added As part of 11.0.6 Enhancement START
+        feba.domManipulator.getElement('body').append("<div id='darkenScreenObject' style='z-index: 2000; position: absolute; filter: alpha(opacity=40); BACKGROUND-COLOR: #000000; width:100%; display: block; height: 2500px; overflow: hidden; top: 0px; left: 0px; bottom:0px; opacity: 0.7; mozopacity: 0.7;'/>");
+        //Added As part of 11.0.6 Enhancement END
+        doc.write(str);
+        //},200);
+        return doc;
+    };
+
+    start();
+}
+
+/*
+ * This method will refresh the current page with the given url.
+ * This method will be called from Session alert popup
+ * @param url, the URL to be loaded
+ */
+function goToLoginPage(url) {
+    //Refreshes the main page with the login page
+    window.open(url, '_self');
+}
+
+/*
+ * This method will refresh the session by using prevent session timeout link
+ * in the page header
+ */
+function resetSession() {
+    //Click on the Prevent Session Timeout button in the page header to reset the session value.
+    document.getElementById("PREVENT_SESSION_TIMEOUT__").click();
+}
+
+
+/*
+ * This method will remove the darkened screen and will display the  
+ * parent window. Added as part of 11.0.6 Enhancement
+ */
+function showParentWindow() {
+    feba.domManipulator.getElementById("darkenScreenObject").remove();
+}
+
+//Code change for FNEB10.3_CR74 - Session time out ends here
+//-------------------------------------------------------------------
+
+
+/**
+ * This method is used to get the reset buttons present on a particular view
+ * @param groupletId
+ * Added for ticket id 546724.
+ */
+function getResetButtons(groupletId) {
+    if (groupletId == 'null') {
+        groupletId = '';
+    }
+    var resetButtons = feba.domManipulator.find(feba.domManipulator.getElement(document), ':input[type*="Reset"][id*="' + groupletId + '"]');
+    if (resetButtons.length == 0) {
+        resetButtons = feba.domManipulator.find(feba.domManipulator.getElement(document), ':input[type*="reset"][id*="' + groupletId + '"]');
+    }
+    return resetButtons;
+}
+
+function getFunctionCodeDetails() {
+    document.AuthSchemeMaintenanceFG.__EVENT_ID__.disabled = false;
+    document.AuthSchemeMaintenanceFG.__EVENT_ID__.value = "PREVENT_SESSION_TIMEOUT__";
+    document.AuthSchemeMaintenanceFG.submit();
+}
+
+function getFunctCodeDetailsInqFG() {
+    document.InquiryFWFG.__EVENT_ID__.disabled = false;
+    document.InquiryFWFG.__EVENT_ID__.value = "PREVENT_SESSION_TIMEOUT__";
+    document.InquiryFWFG.submit();
+}
+
+//Function to get the specific elements on a page or Grouplet
+function getSpecifiedElements(groupletId, type, isPortal) {
+    var totalElements = new Array();
+    if (!groupletId || isPortal) {
+        var totalPageElements = feba.domManipulator.getElement(type);
+        for (var i = 0; i < totalPageElements.length; i++) {
+            if ((totalPageElements[i].id).indexOf(Constants.GROUPLET_ELEMENT_SEPERATOR) == -1 || isPortal) {
+                totalElements.push(totalPageElements[i]);
+            }
+        }
+    } else {
+        totalElements = feba.domManipulator.find(feba.domManipulator.getElementById(groupletId), type);
+    }
+    return totalElements;
+
+}
+
+//Function to check whether the groupletId is not null and doesn't contain grouplet Seperator
+function isGroupletId(elementId, groupletId) {
+    return feba.domManipulator.isGroupletId(elementId, groupletId);
+}
+
+//-------------------------------------------------------------------
+//This function returns the id of label associated with an element.
+//Parameters:
+//			id: the id of the element whose label has to be found
+//Returns:
+//			id of the label associated with the element
+//-------------------------------------------------------------------
+function getLabelIDByFieldId(Id) {
+    var lableCtrlIds = "";
+    var outLabel = "";
+    lableCtrlIds = document.getElementsByTagName('label');
+    var n = lableCtrlIds.length;
+    for (i = 0; i < n; i++) {
+        var jsVarForControlId = lableCtrlIds[i].htmlFor;
+        if (jsVarForControlId != null && jsVarForControlId == Id) {
+            outLabel = lableCtrlIds[i].id;
+            break;
+        }
+    }
+    return outLabel;
+}
+
+//-------------------------------------------------------------------
+//This function gets the closest parent with the given tag name.
+//Parameters:
+//			obj: the object whose parent needs to be found
+//			tag: the type of parent which needs to be found
+//Returns:
+//			nearest parent of the obj of type tag
+//-------------------------------------------------------------------
+
+function getParentByTagName(obj, tag) {
+    try {
+        //get the parent node
+        var obj_parent = obj.parentNode;
+        //check if the parent node is of type tag
+        // if not, find the parent of parent node
+        //repeat until the required parent is found
+        while (obj_parent.tagName != tag) {
+
+            obj_parent = obj_parent.parentNode;
+
+        }
+        // return the parent of type tag
+        return obj_parent;
+    } catch (err) {
+        //return null if parent of type tag is not found
+        return null;
+    }
+}
+
+//-------------------------------------------------------------------
+//This function checks if there is error in any child element of p 
+//and returns an error flag 
+//Parameters:
+//		childElements of the parent P element, id of the element, regExp contains the starting static id chars of hidden fields
+//		ERROR_ROW_ in case of field.java - Business Exception and  ERROR_HIDDEN_ROW_ in case of dispalyError - type system
+//-------------------------------------------------------------------
+function isAnyChildInError(childElements, id, regExp) {
+    var errorFlag = false;
+
+    for (var i = 0; i < childElements.length; i++) {
+        // if the id matches to the hidden field defined in Field.java/displayError method, set the error flag
+        if (childElements[i].id.match(regExp)) {
+            if (childElements[i].value == 'ROW') {
+                errorFlag = true;
+            }
+        }
+    }
+    return errorFlag;
+}
+
+//-------------------------------------------------------------------
+//This function restores the style, after a typesystem error has
+// been corrected by the user
+//Parameters:
+//		id of the element, whose parent row's or label style has to be restored
+//-------------------------------------------------------------------
+function restoreStyle(id) {
+    // if js config is row, reset the style
+    if (FEBAJSConfig.TYPESYSTEM_ERR_HIGHLIGHT === "ROW") {
+
+        //get parent of element which is of type 'P'
+        var parentP = getParentByTagName(document.getElementById(id), 'P');
+
+        //Checks for any business exception fields
+        var childElements = jQuery(parentP).find('input');
+        var busExErrorFlag = false;
+        var regExp = /^ERROR_ROW_/;
+        busExErrorFlag = isAnyChildInError(childElements, id, regExp);
+
+        //Checks for any type system error fields
+        var typeSysErrorFlag = false;
+        regExp = /^ERROR_HIDDEN_ROW_/;
+        typeSysErrorFlag = isAnyChildInError(childElements, id, regExp);
+
+        // if there is no business exception and type system exception in the child elements of parentP element, then only remove
+        // class ERROR_ROW_BG from the parentP element
+        if ((busExErrorFlag == false) && (typeSysErrorFlag == false)) {
+            // if the parent contains class ERROR_ROW_BG remove it
+            if (hasClass(parentP, "ERROR_ROW_BG")) {
+                var reg = new RegExp('(\\s|^)' + "ERROR_ROW_BG" + '(\\s|$)');
+                parentP.className = parentP.className.replace(reg, ' ');
+            }
+        }
+    }
+    else {
+        // if JS Config is label reset the style
+        if (FEBAJSConfig.TYPESYSTEM_ERR_HIGHLIGHT === "LABEL") {
+            var label = document.getElementById(getLabelIDByFieldId(id));
+            if (hasClass(label, "error_highlight")) {
+                var reg = new RegExp('(\\s|^)' + "error_highlight" + '(\\s|$)');
+                label.className = label.className.replace(reg, ' ');
+            }
+
+        }
+    }
+}
+
+//-------------------------------------------------------------------
+//This function checks if an element contains a class.
+//Parameters:
+//			element
+//			className
+//Returns: 
+//		true, if the element contains the class
+//		false,if the element doesn't contains the class
+//-------------------------------------------------------------------
+
+function hasClass(ele, cls) {
+    //check if the element ele contains the class cls
+    if (ele != null) {
+        return ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+    }
+}
+
+//-------------------------------------------------------------------
+//This function clears error Message after a typesystem error has
+//been corrected by the user
+//Parameters: id of the element whose associated error message needs 
+//to be cleared
+//-------------------------------------------------------------------
+function clearError(id) {
+    // clear the error message
+    // to fix an issue in IE7, removed errorSpan.
+    //Even if we empty the error span in IE7, still it is visible
+    var errorSpan = document.getElementById("ERROR_ROW_" + id);
+    if (errorSpan != null) {
+        jQuery(errorSpan).remove();
+    }
+
+    /*Start Added for Investec CR86*/
+    // Remove error highlighting in case of field inside a table component
+
+    var elem = document.getElementById(id);
+    var tableElem = jQuery(elem).closest('table');
+    if (tableElem.html() != null) {
+        var elems = jQuery(elem).parentsUntil("td");
+        var nLevelSpan = elems[elems.length - 1];
+        if (jQuery(nLevelSpan).hasClass('ERROR_FIELD_BORDER_TYPESYS')) {
+            jQuery(nLevelSpan).removeClass('ERROR_FIELD_BORDER_TYPESYS');
+            hideBubble();
+        }
+    }
+    /*End Added for Investec CR86*/
+    //remove the error style from parent row
+    restoreStyle(id);
+}
+
+/**Start Investec CR104 for Error Highlighting**/
+//This function changes the border color of a field, if it had a Business exception earlier and now it has been corrected  
+function changeFieldBorderColor(elem) {
+    var tableElem = jQuery(elem).closest('table');
+    if (tableElem.html() != null) {
+        var elems = jQuery(elem).parentsUntil("td");
+        var nLevelSpan = elems[elems.length - 1];
+        if (jQuery(nLevelSpan).hasClass('ERROR_FIELD_BORDER')) {
+            jQuery(nLevelSpan).removeClass('ERROR_FIELD_BORDER');
+            jQuery(nLevelSpan).addClass('CORRECTED_ERROR_FIELD_BORDER');
+        }
+    }
+}
+
+/**End Investec CR104 for Error Highlighting**/
+//-------------------------------------------------------------------
+//Added for Investec CR113
+//This function displays typesystem error messages to the user
+//depending upon configurations set in FEBAJSConfiguration.js
+//Parameters:
+//			error: error message to be displayed
+//			id: id of the element associated with the error
+//-------------------------------------------------------------------
+function displayError(error, id) {
+    // check configuration in FEBAJSConfiguration.js
+    if (FEBAJSConfig.TYPESYSTEM_ERR_DISPLAY === "POPUP") {
+        // show a popup with error message
+        alert(error);
+    }
+    else {
+        if (FEBAJSConfig.TYPESYSTEM_ERR_DISPLAY === "FIELD") {
+            //create a span element if not already present
+            var errorSpan = document.getElementById("ERROR_ROW_" + id);
+            if (errorSpan == null) {
+                errorSpan = document.createElement('span');
+            }
+            else {
+                errorSpan.innerHTML = "";
+            }
+
+
+            var elem = document.getElementById(id);
+            /*Start Added for Investec CR86*/
+            //If the field in error is inside a table, then
+            //highlight the border of field's outer span
+            //and add pop-up bubble mouse events to it
+            var tableElem = jQuery(elem).closest('table');
+            var tableElemStyle = tableElem.attr('class');
+            //to check if the table belongs to the portal theme
+            //then we can ignore that particular table
+            if (tableElemStyle == 'layoutColumn') {
+                tableElem = null;
+            }
+            if (tableElem != null && tableElem.html() != null) {
+                var elems = jQuery(elem).parentsUntil("td");
+                var nLevelSpan = elems[elems.length - 1];
+                if (!jQuery(nLevelSpan).hasClass('ERROR_FIELD_BORDER_TYPESYS')) {
+                    /*Start Investec CR104 for Error Highlighting*/
+                    //If this field was corrected after business exception, remove that class(CORRECTED_ERROR_FIELD_BORDER) now
+                    if (jQuery(nLevelSpan).hasClass('CORRECTED_ERROR_FIELD_BORDER')) {
+                        jQuery(nLevelSpan).removeClass('CORRECTED_ERROR_FIELD_BORDER');
+                    }
+                    /*End Investec CR104 for Error Highlighting*/
+                    jQuery(nLevelSpan).addClass("ERROR_FIELD_BORDER_TYPESYS");
+                    showBubble("ERROR_FIELD_BORDER_TYPESYS", error);
+                }
+            }
+            /*End Added for Investec CR86*/
+            else {
+                var elems = jQuery(elem).parentsUntil("p");
+                var nLevelSpan = elems[elems.length - 1];
+
+                /* Added by Vivek Niraimathi for javascript error messages with parent as div*/
+                if (nLevelSpan.id == null || nLevelSpan.id == "") {
+                    var elems = jQuery(elem).parentsUntil("div");
+                    var nLevelSpan = elems[elems.length - 1];
+                }
+                /* Added by Vivek Niraimathi for javascript error messages with parent as div*/
+
+                // add error message to the span
+                errorSpan.id = "ERR_MSG_SPAN_" + id;
+                errorSpan.className = "simpletext";
+                jQuery(errorSpan).html(error);
+
+                //Forms the span for row and append it as the
+                //last children to parent span(To work in case of composite components)
+                var parentErrorSpan = document.createElement('span');
+                parentErrorSpan.id = "ERROR_ROW_" + id;
+                parentErrorSpan.className = "ERROR_ROW_SPAN";
+                jQuery(parentErrorSpan).html(errorSpan);
+
+                //Added random number for error filed in order to not to violate the unique id standards
+                var number = 1 + Math.floor(Math.random() * 600);
+                var hiddenField = "<input type=hidden id=\"ERROR_HIDDEN_ROW_" + number + "\" value=\"ROW\">";
+                jQuery(parentErrorSpan).append(hiddenField);
+                // add span to the row
+                jQuery(nLevelSpan).append(parentErrorSpan);
+            }
+            // Adding attributes required for JAWS
+            var eSpan = feba.domManipulator.getElement(errorSpan);
+            feba.domManipulator.setAttribute(eSpan, 'Role', 'alert');
+            feba.domManipulator.setAttribute(eSpan, 'aria-live', 'assertive');
+            feba.domManipulator.setAttribute(eSpan, 'title', errorSpan.innerHTML);
+            var eSpanParent = feba.domManipulator.parent(errorSpan);
+            eSpanParent = feba.domManipulator.getElement(eSpanParent);
+            feba.domManipulator.setAttribute(eSpanParent, 'Role', 'alert');
+            feba.domManipulator.setAttribute(eSpanParent, 'aria-live', 'assertive');
+        }
+    }
+    // highlight the error field
+    highlightErrorField(id);
+}
+
+//-------------------------------------------------------------------
+//This function highlights error label or row depending on 
+//configuration set in FEBAJSConfiguration.js
+//Parameters: id: id of the element associated with the error
+//-------------------------------------------------------------------
+function highlightErrorField(id) {
+    if (FEBAJSConfig.TYPESYSTEM_ERR_HIGHLIGHT === "LABEL") {
+        var label = document.getElementById(getLabelIDByFieldId(id));
+        //if label is to be highlighted, add the class to label
+        label.className += " error_highlight";
+    }
+    else {
+        //if row is to be highlighted, add the class to row
+        if (FEBAJSConfig.TYPESYSTEM_ERR_HIGHLIGHT === "ROW") {
+            var parent = getParentByTagName(document.getElementById(id), 'P');
+            if ((parent != null) && (!hasClass(parent, "ERROR_ROW_BG"))) {
+                parent.className += " ERROR_ROW_BG";
+            }
+
+        }
+    }
+}
+
+//-------------------------------------------------------------------
+//This function highlights the rows containing hidden field with id
+//ERROR_ROW_[RANDOM NUMBER]
+//This field will be added by Field.java in case the field contains an error
+//-------------------------------------------------------------------
+function highLightErrorRow() {
+    // get all the elements of the document
+    var element = document.getElementsByTagName('input');
+
+    // Removes the error from current location and insert into a proper location
+    // In case of composite component, the error should come after all its elements
+    var errorElems = jQuery('.ERROR_ROW_HIGHLIGHT');
+    var totalErrorElems = errorElems.length;
+
+    for (var index = 0; index < totalErrorElems; index++) {
+        var elems = jQuery(errorElems[index]).parentsUntil("p");
+        var nLevelSpan = elems[elems.length - 1];
+        // If the element's parent is span then only adjust the error message's location
+        if (jQuery(nLevelSpan).is("span")) {
+            //Get the DOM element of error row
+            var highlightedRow = errorElems[index];
+            //Remove the element highlightedRow from the present location and append it as the last child
+            //of its parent
+            var htmlBackup = "<span id=\"" + highlightedRow.id + "\" class=\"ERROR_ROW_HIGHLIGHT" + "\" >" + jQuery(highlightedRow).html() + "</span>";
+            jQuery(highlightedRow).remove();
+            jQuery(nLevelSpan).append(htmlBackup);
+        }
+    }
+
+    for (var i = 0; i < element.length; i++) {
+        // if the id matches to the hidden field defined in Field.java, highlight the parent row
+        if (element[i].id.match(/^ERROR_ROW_/)) {
+            if (element[i].value == 'ROW') {
+                var parentP = getParentByTagName(element[i], 'P');
+                if ((parentP != null) && (!hasClass(parentP, "ERROR_ROW_BG"))) {
+                    parentP.className += " ERROR_ROW_BG";
+                }
+            }
+
+        }
+    }
+
+}
+
+/*Start Added for Investec CR86*/
+//-------------------------------------------------------------------
+//This function highlights the fields containing hidden field with id
+//ERROR_FIELD_[RANDOM NUMBER]
+//This field will be added by Field.java for listing fields in case 
+//the field contains an error
+//-------------------------------------------------------------------
+function highLightErrorField() {
+    // get all the elements of the document
+    var element = document.getElementsByTagName('input');
+
+    for (var i = 0; i < element.length; i++) {
+        if (element[i].id.match(/^ERROR_FIELD_/)) {
+
+            var previous = jQuery(element[i]).prev();
+            var prevElement = previous[previous.length - 1];
+            prevElement.className += " ERROR_FIELD_BORDER";
+
+        }
+    }
+}
+
+/*End Added for Investec CR86*/
+
+
+/* Fix for ENY Security concern:start */
+function saveAlert() {
+    var msg = getMessage("SaveAndOpen");
+    msg = msg + " \n";
+    msg = msg + getMessage("LogOutIfOpened");
+    alert(msg);
+}
+
+/* Fix for ENY Security concern:End */
+
+// added by pankaj -start
+function change_dropdown(id) {
+    var yearly = 'Y';
+    var monthly = 'M';
+    var quarterly = 'Q';
+    var fgName = document.getElementById("GROUPLET_FORMSGROUP_ID__").value;
+    var frequency = feba.domManipulator.getElementById(fgName + ".BUDGET_FREQUENCY");
+    var budgetEffective = feba.domManipulator.getElementById(fgName + ".BUDGET_EFFECTIVE");
+    var value = jQuery(frequency);
+    value = value.val();
+    if (value === yearly) {
+        budgetEffective.disabled = true;
+    }
+    else {
+        budgetEffective.disabled = false;
+    }
+    var currentDate = new Date();
+    var currentMonth = currentDate.getMonth();
+    //Month starts from 0 in JS so added 1
+    currentMonth = currentMonth + 1;
+    //For setting the current month in Add Item flow(id is 1 for Add Item)
+    var selectMonth, setMonth;
+    if (id === 0) {
+        if (value === monthly) {
+            selectMonth = jQuery('Select option[value="' + currentMonth + '"]');
+            setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+            feba.domManipulator.trigger(setMonth, "change");
+        }
+        if (value === quarterly) {
+            currentMonth = Math.floor((currentMonth - 1) / 3);
+            currentMonth = currentMonth * 3 + 1;
+            selectMonth = jQuery('Select option[value="' + currentMonth + '"]');
+            setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+            feba.domManipulator.trigger(setMonth, "change");
+        }
+        //To preselect current year
+        var currentYear = new Date().getFullYear();
+        var year = document.getElementById("BudgetMaintenanceFG.BUDGET_YEAR");
+
+        selectMonth = jQuery('Select option[value="' + currentYear + '"]');
+        setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+        feba.domManipulator.trigger(setMonth, "change");
+    } else {
+        var startMonthFinYear = feba.domManipulator.getElementById(fgName + ".START_MONTH_FINANCIAL_YEAR").val();
+        var pageload_flag = feba.domManipulator.getElementById("PAGELOAD_FLAG").val();
+        if (pageload_flag == "false") {
+            document.getElementById("PAGELOAD_FLAG").value = "true";
+            if (value === monthly) {
+                selectMonth = jQuery('Select option[value="' + id + '"]');
+                setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+                feba.domManipulator.trigger(setMonth, "change");
+            }
+            if (value === quarterly) {
+                id = Math.floor((id - 1) / 3);
+                id = id * 3 + 1;
+                selectMonth = jQuery('Select option[value="' + id + '"]');
+                setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+                feba.domManipulator.trigger(setMonth, "change");
+            }
+        } else {
+            if (value === monthly) {
+                selectMonth = jQuery('Select option[value="' + 1 + '"]');
+                setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+                feba.domManipulator.trigger(setMonth, "change");
+            }
+            if (value === quarterly) {
+                selectMonth = jQuery('Select option[value="' + startMonthFinYear + '"]');
+                setMonth = feba.domManipulator.setAttribute(selectMonth, "selected", true);
+                feba.domManipulator.trigger(setMonth, "change");
+            }
+        }
+    }
+}
+
+var getSelectorElement = function (selector) {
+    return jQuery(selector);
+};
+// added by pankaj -end
+
+/*Added By Siddhesh_Chaugule For MonthRangeSelectTag Start*/
+
+function highlight_month(callerObj, yearspread, style_month, style_month_selected) {
+
+    var parentNodeid = callerObj.parentNode.id;
+    var parentNod = callerObj.parentNode;
+    var mainparentNod = callerObj.parentNode.parentNode;
+
+    var nodes = parentNod.childNodes;
+    for (var i = 0; i < nodes.length; i++) {
+        nodes[i].setAttribute("class", style_month);
+    }
+    callerObj.setAttribute("class", style_month_selected);
+    var monthname = callerObj.getAttribute("value");
+    var currentvalue = mainparentNod.getElementsByTagName("input")[0].value;
+    var index = currentvalue.indexOf("-");
+    var year = currentvalue.substring(index + 1);
+    mainparentNod.getElementsByTagName("input")[0].value = monthname.concat("-", year);
+}
+
+function select_previous_year(callerObj, yearspread, style_month, style_month_selected) {
+
+    var mainparentNod = callerObj.parentNode.parentNode;
+    var currenttextvalue = parseInt(callerObj.parentNode.getElementsByTagName("a")[0].innerHTML);
+    //var yearspread = parseInt(callerObj.parentNode.parentNode.getAttribute("yearspread"));
+    var date = parseInt(new Date().getFullYear());
+    var low = date - yearspread;
+    var high = date + yearspread;
+    if (currenttextvalue > low) {
+        callerObj.parentNode.getElementsByTagName("a")[0].innerHTML = currenttextvalue - 1;
+        var currentvalue = mainparentNod.getElementsByTagName("input")[0].value;
+        var index = currentvalue.indexOf("-");
+        var month = currentvalue.substring(0, index);
+        var year = currentvalue.substring(index + 1, 10);
+        mainparentNod.getElementsByTagName("input")[0].value = month.concat("-", currenttextvalue - 1);
+    }
+}
+
+function select_next_year(callerObj, yearspread, style_month, style_month_selected) {
+
+    var mainparentNod = callerObj.parentNode.parentNode;
+    var currenttextvalue = parseInt(callerObj.parentNode.getElementsByTagName("a")[0].innerHTML);
+    //var yearspread = parseInt(callerObj.parentNode.parentNode.getAttribute("yearspread"));
+    var date = parseInt(new Date().getFullYear());
+    var low = date - yearspread;
+    var high = parseInt(date, 10) + parseInt(yearspread, 10);
+
+    if (currenttextvalue < high) {
+        callerObj.parentNode.getElementsByTagName("a")[0].innerHTML = currenttextvalue + 1;
+        var currentvalue = mainparentNod.getElementsByTagName("input")[0].value;
+        var index = currentvalue.indexOf("-");
+        var month = currentvalue.substring(0, index);
+        var year = currentvalue.substring(index + 1, 10);
+        mainparentNod.getElementsByTagName("input")[0].value = month.concat("-", currenttextvalue + 1);
+    }
+}
+
+/*Added By Siddhesh_Chaugule For MonthRangeSelectTag End*/
+
+// Converts the select elements to the new autocomplete enabled comboboxes.
+function convertComboboxes() {
+    feba.domManipulator.styleComboboxes(feba.domManipulator.getElement("select[" + Constants.EXCLUDE_JSCOMBO_ATTR + "!='true']"), {
+        literals: {
+            noItemFound: getMessage("comboBoxNoItemFoundMsg"),
+            showAll: getMessage("comboBoxShowAllButton")
+        }
+    });
+}
+
+/**
+ * This function will get update error message locations
+ */
+
+function updateErrorMsgLocation(tag, style) {
+
+
+    //Get parent element for tag
+    var taghelpers = jQuery(tag + "." + style);
+
+    // Get error message elements
+    feba.domManipulator.each(taghelpers, function () {
+
+        var errorMessageElems = feba.domManipulator.find(feba.domManipulator.getElement(this), ".ERROR_ROW_HIGHLIGHT");
+        feba.domManipulator.each(errorMessageElems, moveMessage);
+    });
+}
+
+/**
+ * This function will get the error message and append it to corresponding id
+ */
+
+function moveMessage() {
+
+    var childElems = feba.domManipulator.children(feba.domManipulator.getElement(this));
+    var firstChildElem = childElems[0];
+    // Get id of field in error from ERR_MSG_{id}
+    var elemId = firstChildElem.id;
+    var fieldId = elemId.replace("ERR_MSG_", "");
+    // Get field in error
+    var fieldElem = feba.domManipulator.getElementById(fieldId);
+    var field = fieldElem[fieldElem.length - 1];
+    // Get parents of the field till row ("p")
+    var fieldParent = feba.domManipulator.getParentsUntil(field, "p");
+    // Append error message to column 2 element
+    feba.domManipulator.append(feba.domManipulator.getElement(fieldParent[fieldParent.length - 1]), this.outerHTML);
+    // Remove error message from earlier position
+    feba.domManipulator.remove(feba.domManipulator.getElement(this));
+}
+
+//Added for FEBA Operational Management::START
+
+var index = 0;
+var XMLHttpRequestObjects = new Array();
+//CREATING MULTIPLE XMLHTTPREQUEST OBJECTS FOR EACH CALL
+//THIS WILL HELP NOT TO JAM THE SERVER WITH MULTIPLE REQUESTS AT ONCE. 
+function getXmlHttpRequest() {
+    if (window.XMLHttpRequest) {
+        XMLHttpRequestObjects.push(new XMLHttpRequest());
+    } else if (window.ActiveXObject) {
+        XMLHttpRequestObjects.push(new ActiveXObject("Microsoft.XMLHTTP"));
+    }
+    index = XMLHttpRequestObjects.length;
+}
+
+function cacheExpiryMessage(indexXml, urlElement, xmlContent, urlArrayLen) {
+    getXmlHttpRequest();
+    if (window.location.href.indexOf("jsessionid") > -1) {
+        var jsessionId = window.location.href.indexOf("jsessionid") - 1;
+        var question = window.location.href.indexOf("?");
+        var sessionIdis = window.location.href.substring(jsessionId, question);
+        alert("question is>" + question);
+
+        if (!(urlElement.indexOf("jsessionid") > -1)) {
+            urlElement = urlElement + sessionIdis;
+        }
+    }
+    var pgHeading = feba.domManipulator.getElementById(Constants.PAGEHEADING_TAG);
+    if (!feba.domManipulator.getElementById("errTable").length) {
+        pgHeading.after("<div><center><table id='errTable' style='table-layout:fixed;'></table></center></div>");
+    }
+    if (XMLHttpRequestObjects[indexXml]) {
+        XMLHttpRequestObjects[indexXml].open("POST", urlElement, true);
+        //Send the proper header information along with the request
+        XMLHttpRequestObjects[indexXml].setRequestHeader('IPTYPE', 'XML');
+        XMLHttpRequestObjects[indexXml].setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        XMLHttpRequestObjects[indexXml].setRequestHeader("Connection", "Keep-Alive");
+        XMLHttpRequestObjects[indexXml].onreadystatechange = function () {
+            var host = urlElement.split("://");
+            var port = host[1].substring(host[1].lastIndexOf(":") + 1, host[1].indexOf("/"));
+            host = host[1].substring(0, host[1].lastIndexOf(":"));
+            feba.domManipulator.blockUI({
+                message: '<h1><img src="L001/consumer/images/widget-loading.gif"/></h1>',
+                baseZ: 9999
+            });
+            // if response is successful
+            if (XMLHttpRequestObjects[indexXml].readyState == 4 && XMLHttpRequestObjects[indexXml].status == 200) {
+                var xmlString = XMLHttpRequestObjects[indexXml].responseText;
+                var message = '<hd:MESSAGE>';
+                var messageArray = xmlString.split(message);
+                var len = messageArray.length;
+                var messageCode = 'hd:MESSAGE_CODE';
+                var messageDesc = 'hd:MESSAGE_DESC';
+                for (var l = 1; l < len; l++) {
+                    var errCode = getDataFromKeyInXML(messageArray[l], messageCode);
+                    var errMsg = getDataFromKeyInXML(messageArray[l], messageDesc);
+                    if (errCode === "0000") {
+                        var text = "<div role='alert' class='greenbg' aria-live='assertive'> <a href='#' id='errorlink1' title='" + getMessage("CacheInvalidationSuccess") + "'><img src='L001/bankuser/images/information-icon.gif' alt='" + getMessage("OneInformtnMessageTitle") + "' title='" + getMessage("OneInformtnMessageTitle") + "' class='absmiddle'></a>" + getMessage("CacheInvalidationSuccess") + " - " + getMessage("Host") + " : " + host + getMessage("ForPort") + " : " + port + "</div>";
+                        paintErrorInTable(text);
+                    } else {
+                        var text = "<div role='alert' class='redbg' aria-live='assertive'> <a href='#' id='errorlink1' title='" + errMsg + "'><img src='L001/bankuser/images/error-icon.gif  ' alt='" + getMessage("ErrorMessageTitle") + "' title='" + getMessage("ErrorMessageTitle") + "' class='absmiddle'></a><span dir='ltr'>[" + errCode + "] </span>" + errMsg + " - " + getMessage("Host") + " : " + host + getMessage("ForPort") + " : " + port + "</div>";
+                        paintErrorInTable(text);
+                    }
+                }
+
+            } else if ((XMLHttpRequestObjects[indexXml].readyState == 4 && XMLHttpRequestObjects[indexXml].status != 200) || XMLHttpRequestObjects[indexXml].status == 401) {
+                var text = "<div role='alert' class='redbg' aria-live='assertive'> <a href='#' id='errorlink1' title='" + getMessage("CacheInvalidationUnSuccess") + "'><img src='L001/bankuser/images/error-icon.gif' alt='" + getMessage("ErrorMessageTitle") + "' title='" + getMessage("ErrorMessageTitle") + "' class='absmiddle'></a>" + getMessage("CacheInvalidationUnSuccess") + " - " + getMessage("Host") + " : " + host + getMessage("ForPort") + " : " + port + "</div>";
+                paintErrorInTable(text);
+            }
+            if (urlArrayLen - 1 == indexXml) {
+                feba.domManipulator.unblockUI();
+            }
+            setTimeout(function () {
+                feba.domManipulator.unblockUI();
+
+            }, 1000);
+        }
+        XMLHttpRequestObjects[indexXml].send(xmlContent);
+    }
+}
+
+function raiseRequest(currentObj) {
+    //var xmlContent = currentObj.content[5][1];
+    //var urlArray = currentObj.content[6][1];
+    var xmlContent = document.getElementById("xmlContent").value;
+    var urlArray = document.getElementById("urlArray").value;
+    var individualUrlArray = "";
+    individualUrlArray = urlArray.split(",");
+    for (var i = 0; i < individualUrlArray.length; i++) {
+        var urlElement = individualUrlArray[i];
+        var processedUrlElementArray = urlElement.split("|");
+        cacheExpiryMessage(i, processedUrlElementArray[0], xmlContent, individualUrlArray.length)
+    }
+}
+
+//Added for FEBA Operational Management::END
+/* function for confirmation for Restore Dashboard button*/
+function restore_confirm(fieldId) {
+
+    var r = confirm("Are you sure you want to Reset?");
+    if (r == true) {
+        document.getElementById(fieldId).value = "1";
+
+    }
+    else {
+        document.getElementById(fieldId).value = "0";
+    }
+}
+
+/* Changes for Password Strength */
+
+/* This function determines the Sign On Password entered by user and invokes function for 
+ determining its strength. */
+
+function chkSignOnPwdStrength(pwdField) {
+    var password = feba.domManipulator.getElementById(pwdField).val();
+    determinePasswordStrength(password, "signOnPwdStrengthImage", "signOnPwdStrengthVal");
+}
+
+function chkSignOnPwdStrengthNew(pwdField, imageId, valId) {
+    var password = feba.domManipulator.getElementById(pwdField).val();
+    determinePasswordStrength(password, imageId, valId);
+}
+
+function removeStrength(valId) {
+    feba.domManipulator.getElementById('imageStrength').remove();
+    feba.domManipulator.addText(feba.domManipulator.getElementById(valId), "");
+}
+
+/* This function determines the Transaction Password entered by user and invokes function for
+ determining its strength. */
+
+function chkTxnPwdStrength(pwdField) {
+    var password = feba.domManipulator.getElementById(pwdField).val();
+    determinePasswordStrength(password, "txnPwdStrengthImage", "txnPwdStrengthVal");
+}
+
+function chkTxnPwdStrengthNew(pwdField, imageId, valId) {
+    var password = feba.domManipulator.getElementById(pwdField).val();
+    determinePasswordStrength(password, imageId, valId);
+}
+
+function determinePasswordStrength(password, strengthImageField, strengthValueField) {
+
+    var rule2Strength = 0;
+    var strengthForSpclChar = 0;
+    var strengthForDigit = 0;
+    var imageSrc = "";
+    var style = "";
+    var pwdStrength = "";
+    var tooShortImg = "";
+    var weakImage = "";
+    var fairImage = "";
+    var strongImage = "";
+    var veryStrongImage = "";
+
+    /* Fetching PRPM values */
+
+    var minPasswordLength = feba.domManipulator.getElementById("MIN_LENGTH_OF_PASSWORD").val();
+    var isSpecialCharReqd = feba.domManipulator.getElementById("PWD_SPECIAL_CHAR_MANDATORY").val();
+    var isDigitReqd = feba.domManipulator.getElementById("PWDDIGITMAND").val();
+    var strengthsConfigured = feba.domManipulator.getElementById("PASSWORD_STRENGTH").val();
+    var imagePath = feba.domManipulator.getElementById("IMAGE_PATH").val();
+
+    var specialChars = "<>@!#$%^&*()_+[]{}?:;|'\"\\,./~`-=";
+
+    /* Setting lengths as per the pre-defined rules*/
+
+    var rule1Length = parseInt(minPasswordLength) + parseInt(2);
+    var rule2Length = parseInt(minPasswordLength) + parseInt(4);
+    var rule3Length = parseInt(minPasswordLength) + parseInt(5);
+
+    var pwdStrengthArray = strengthsConfigured.split('|');
+
+    if (strengthValueField == "signOnPwdStrengthVal") {
+        feba.domManipulator.addText(feba.domManipulator.getElementById('txnPwdStrengthVal'), "");
+    }
+    else {
+        feba.domManipulator.addText(feba.domManipulator.getElementById('signOnPwdStrengthVal'), "");
+    }
+
+    feba.domManipulator.addText(feba.domManipulator.getElementById('signOnOldPwdStrengthVal'), "");
+    feba.domManipulator.addText(feba.domManipulator.getElementById('signOnRePwdStrengthVal'), "");
+
+    /* Password Strength is "Too short" when its length is zero */
+
+    if (password.length == 0) {
+        tooShortImg = imagePath + "/Too-Short.gif";
+        imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + tooShortImg + ">";
+        style = 'too-short';
+        pwdStrength = pwdStrengthArray[0];
+        displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+    }
+
+    /* Password Strength is "Weak" when its length is less than the minimum length configured in PRPM */
+
+    if (password.length > 0 && password.length < rule1Length) {
+        weakImage = imagePath + "/Weak.gif";
+        imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + weakImage + ">";
+        style = 'weak';
+        pwdStrength = pwdStrengthArray[1];
+        displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+    }
+
+    /* Password Strength is "Fair" when its length is 2 characters more than the minimum length configured in PRPM */
+
+    if (password.length >= rule1Length && password.length < rule2Length) {
+        fairImage = imagePath + "/Fair.gif";
+        imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + fairImage + ">";
+        style = 'fair';
+        pwdStrength = pwdStrengthArray[2];
+        displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+
+    }
+
+    /* Password Strength is "Strong" when its length is 4 characters more than minimum length and it
+     contains atleast 2 special characters */
+
+    if (password.length >= rule2Length && password.length < rule3Length) {
+        if (isSpecialCharReqd == "Y") {
+
+            for (var i = 0; i < password.length; i++) {
+                if (specialChars.indexOf(password.charAt(i)) != -1) {
+                    rule2Strength += 1;
+
+                }
+            }
+            if (rule2Strength == 2) {
+                strongImage = imagePath + "/Strong.gif";
+                imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + strongImage + ">";
+                style = 'strong';
+                //pwdStrength = pwdStrengthArray[3];
+                if (langCode == '002')
+                    pwdStrength = 'сайн';
+                else {
+                    pwdStrength = pwdStrengthArray[3];
+                }
+                displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+            }
+            /* Password Strength is "Fair" if it contains < 2  special characters though password length is
+             4 characters more than minimum length  */
+
+            else if (rule2Strength < 2) {
+                fairImage = imagePath + "/Fair.gif";
+                imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + fairImage + ">";
+                style = 'fair';
+                pwdStrength = pwdStrengthArray[2];
+                displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+            }
+        }
+    }
+
+    /* Password Strength is "Very Strong" when its length is 5 characters more than minimum length,it
+     contains atleast 2 special characters and atleast 1 digit */
+
+    if (password.length >= rule3Length) {
+
+        if (isSpecialCharReqd == "Y") {
+            for (var i = 0; i < password.length; i++) {
+                if (specialChars.indexOf(password.charAt(i)) != -1) {
+                    strengthForSpclChar += 1;
+                }
+            }
+        }
+        if (isDigitReqd == "Y") {
+            if (password.match(/([0-9])/)) {
+                strengthForDigit += 1;
+            }
+        }
+
+        if (strengthForSpclChar >= 2) {
+            if (strengthForDigit < 1) {
+                strongImage = imagePath + "/Strong.gif";
+                imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + strongImage + ">";
+                style = 'strong';
+                pwdStrength = pwdStrengthArray[3];
+                displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+            }
+            else if (strengthForDigit >= 1) {
+                veryStrongImage = imagePath + "/Very-Strong.gif";
+                imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + veryStrongImage + ">";
+                style = 'very-strong';
+                pwdStrength = pwdStrengthArray[4];
+                displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+            }
+        }
+
+        /* Password Strength is "Fair" if it contains < 2  special characters though password length is
+         5 characters more than minimum length and it contains more than 1 digit */
+
+        else if (strengthForSpclChar < 2) {
+            fairImage = imagePath + "/Fair.gif";
+            imageSrc = "<img class=\"absmiddle\" id=\"imageStrength\" src=" + fairImage + ">";
+            style = 'fair';
+            pwdStrength = pwdStrengthArray[2];
+            displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField);
+        }
+    }
+
+}
+
+/* This method is used for dynamically removing/adding(appending) the strength images and strength values */
+
+function displayPasswordStrength(imageSrc, style, pwdStrength, password, strengthImageField, strengthValueField) {
+
+    feba.domManipulator.getElementById('imageStrength').remove();
+    feba.domManipulator.append(feba.domManipulator.getElementById(strengthImageField), imageSrc);
+
+    feba.domManipulator.removeStrengthClass(feba.domManipulator.getElementById(strengthValueField));
+    feba.domManipulator.addClass(feba.domManipulator.getElementById(strengthValueField), style);
+    feba.domManipulator.addText(feba.domManipulator.getElementById(strengthValueField), pwdStrength);
+
+}
+
+/* Added for 1106 Average Quarterly & monthly balance :: START */
+function defaultMonthSelection() {
+    var elementId = this.options.target.split("=")[0],
+        element = LIB.__GET_DOM__(elementId),
+        size = element.length;
+
+    //Current Year selected & current month is not Dec
+    if ((size != 12) && (size < 12)) {
+        element.selectedIndex = size - 1;
+    }
+    //Current Year selected & current month is Dec
+    else if (size == 13) {
+        element.length = size - 1;
+        element.selectedIndex = size - 2;
+    }
+}
+
+function defaultQuarterSelection() {
+
+    var elementId = this.options.target.split("=")[0],
+        element = LIB.__GET_DOM__(elementId),
+        size = element.length;
+
+    //Current Year selected & current month is not in last quarter
+    if ((size != 4) && (size < 4)) {
+        element.selectedIndex = size - 1;
+    }
+    //Current Year selected & current month is in last quarter
+    else if (size == 5) {
+        element.length = size - 1;
+        element.selectedIndex = size - 2;
+    }
+}
+
+/* Added for 1106 Average Quarterly & monthly balance :: END */
+
+// Addded by shreya_sontakke for triggering button click on change of customer id value from dropdown in header
+/*
+ * This map is used to store the event names which will be invoked on 
+ * change of value in dropdowns in Ebux-3 header
+ */
+var headerComboEventsMap = {
+    "CUST_ID_SELECT": "FILTER_CUST_ID_ACCOUNTS",
+    "SELECTED_CUST_ID__": "CUST_ID_CHANGE_EVENT__",
+    "DIV_ID_SELECT": "FILTER_DIV_ID_ACCOUNTS",
+    "SELECTED_DIV_ID__": "DIV_ID_CHANGE_EVENT__",
+    "SELECTED_CTX_ID__": "SWITCH_CONTEXTS_",
+    "SSO_APP_ID__": "SSO_APP_SWITCH_",
+    "_SKIN_CHANGE_": "_SKIN_CHANGE_EVENT_",
+    "TIME_ZONE__": "TIMEZONE_EVENT__"
+};
+
+/*
+ * This function is used invoke actions on 
+ * change of value in dropdowns in Ebux-3 header
+ */
+function callheaderComboEvent(element) {
+    var domMan = feba.domManipulator;
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var elementId = domMan.getAttribute(element, "id");
+    // Fectching the event name from Events map headerComboEventsMap
+    var headerComboEvent;
+    headerComboEvent = domMan.getElementById(headerComboEventsMap[elementId.replace(fgName + ".", "")]);
+    // This tiggers the selected event from map headerComboEventsMap
+    domMan.trigger(headerComboEvent, "click");
+}
+
+// Added by shreya_sontakke to toggle the display of pulldown in header
+/*
+ * This function is used to show-hide pulldowns
+ * (font change and my profile pulldown) in Ebux-3 header
+ */
+function headerToggleEvent(linkElement, fontFlag) {
+    var domMan = feba.domManipulator;
+    var parent = domMan.parents(linkElement, ".headerRowset");
+    var pulldownEle = domMan.siblings(parent);
+    var child1 = domMan.getChildren(domMan.children(parent), ":first");
+    var child2 = domMan.getChildren(domMan.children(parent), ":last");
+    var isVisible = pulldownEle.is(":visible");
+    var labelEle = domMan.children(domMan.children(child1));
+    var arrowImgEle = domMan.children(domMan.children(child2));
+
+    // Logic for hiding the pulldown
+    if (isVisible) {
+        pulldownEle.slideUp(function () {
+            domMan.removeClass(child1, "pulldownSelectLeft");
+            domMan.removeClass(child2, "pulldownSelectRight");
+            domMan.addClass(child1, "pulldownUnSelectLeft");
+            domMan.addClass(child2, "pulldownUnSelectRight");
+            if (fontFlag) {
+                domMan.removeClass(labelEle, "rightTextBlackBold");
+                domMan.removeClass(arrowImgEle, "blackArrowImg");
+                domMan.addClass(labelEle, "rightTextBold");
+                domMan.addClass(arrowImgEle, "whiteArrowImg");
+            }
+        });
+    } else {
+        // Logic for showing the pulldown
+        domMan.removeClass(child1, "pulldownUnSelectLeft");
+        domMan.removeClass(child2, "pulldownUnSelectRight");
+        domMan.addClass(child1, "pulldownSelectLeft");
+        domMan.addClass(child2, "pulldownSelectRight");
+        if (fontFlag) {
+            domMan.removeClass(labelEle, "rightTextBold");
+            domMan.removeClass(arrowImgEle, "whiteArrowImg");
+            domMan.addClass(labelEle, "rightTextBlackBold");
+            domMan.addClass(arrowImgEle, "blackArrowImg");
+        }
+        pulldownEle.slideDown();
+        // Logic for hiding the pulldown when clicked anywhere on the page outside the pulldown
+        var toggleBack = function (config, event) {
+
+            if (parent.parent().has(event.target).length === 0 && event.target.id != "TIMEZONE_EVENT__"
+                && !domMan.isMatching(event.target, ".ui-widget li.ui-menu-item a")) {
+                console.log(event);
+                pulldownEle.slideUp(function () {
+                    domMan.removeClass(child1, "pulldownSelectLeft");
+                    domMan.removeClass(child2, "pulldownSelectRight");
+                    domMan.addClass(child1, "pulldownUnSelectLeft");
+                    domMan.addClass(child2, "pulldownUnSelectRight");
+                    if (fontFlag) {
+                        domMan.removeClass(labelEle, "rightTextBlackBold");
+                        domMan.removeClass(arrowImgEle, "blackArrowImg");
+                        domMan.addClass(labelEle, "rightTextBold");
+                        domMan.addClass(arrowImgEle, "whiteArrowImg");
+                    }
+                });
+                feba.js.common.documentClickWatcher.deregister(linkElement);
+            }
+        }
+
+        feba.js.common.documentClickWatcher.register(linkElement, {callBack: toggleBack});
+    }
+}
+
+//Added by shreya_sontakke to toggle the display of skin pulldown in header
+/*
+ * This function is used to show-hide skin change pulldown in Ebux-3 header
+ */
+function skinPulldownToggleEvent(linkElement) {
+    var domMan = feba.domManipulator;
+    var parent = domMan.children(domMan.parents(linkElement, ".headerRow"));
+    var pulldownEle = domMan.getChildren(parent, ":last");
+    var child1 = domMan.getChildren(parent, ":first");
+    var child2 = domMan.getChildren(parent, ":eq(1)");
+    ;
+    var isVisible = pulldownEle.is(":visible");
+    var labelEle = domMan.getChildren(domMan.children(child1), ":last");
+    var arrowImgEle = domMan.children(domMan.children(child2));
+
+    if (isVisible) {
+        // Logic for hiding the pulldown
+        pulldownEle.slideUp(function () {
+            domMan.removeClass(child1, "skinSelectLeft");
+            domMan.removeClass(child2, "skinSelectRight");
+            domMan.addClass(child1, "skinUnSelectLeft");
+            domMan.addClass(child2, "skinUnSelectRight");
+            domMan.removeClass(labelEle, "rightTextBlack");
+            domMan.removeClass(arrowImgEle, "blackArrowImg");
+            domMan.addClass(labelEle, "rightTextWhite");
+            domMan.addClass(arrowImgEle, "whiteArrowImg");
+        });
+    } else {
+        // Logic for showing the pulldown
+        domMan.removeClass(child1, "skinUnSelectLeft");
+        domMan.removeClass(child2, "skinUnSelectRight");
+        domMan.addClass(child1, "skinSelectLeft");
+        domMan.addClass(child2, "skinSelectRight");
+        domMan.removeClass(labelEle, "rightTextWhite");
+        domMan.removeClass(arrowImgEle, "whiteArrowImg");
+        domMan.addClass(labelEle, "rightTextBlack");
+        domMan.addClass(arrowImgEle, "blackArrowImg");
+        pulldownEle.slideDown();
+        // Logic for hiding the pulldown when clicked anywhere on the page outside the pulldown
+        var toggleBack = function (config, event) {
+            if (parent.parent().has(event.target).length === 0 && event.target.id != "_SKIN_CHANGE_EVENT_") {
+                pulldownEle.slideUp(function () {
+                    domMan.removeClass(child1, "skinSelectLeft");
+                    domMan.removeClass(child2, "skinSelectRight");
+                    domMan.addClass(child1, "skinUnSelectLeft");
+                    domMan.addClass(child2, "skinUnSelectRight");
+                    domMan.removeClass(labelEle, "rightTextBlack");
+                    domMan.removeClass(arrowImgEle, "blackArrowImg");
+                    domMan.addClass(labelEle, "rightTextWhite");
+                    domMan.addClass(arrowImgEle, "whiteArrowImg");
+                });
+                feba.js.common.documentClickWatcher.deregister(linkElement);
+            }
+        }
+
+        feba.js.common.documentClickWatcher.register(linkElement, {callBack: toggleBack});
+    }
+}
+
+// Added by shreya_sontakke for triggering skin change event
+/*
+ * This function is used to trigger skin change event
+ * on click of skin/theme icon in skin pulldown in Ebux-3 header
+ */
+function callSkinChangeEvent(element) {
+    var domMan = feba.domManipulator
+    var fgName = document.getElementById("FORMSGROUP_ID__").value;
+    var elementId = fgName + "._SKIN_CHANGE_";
+    var inputEle = domMan.getElementById(elementId);
+    var selectedEleValue = domMan.getAttribute(element, "data-value");
+    domMan.val(inputEle, selectedEleValue);
+    callheaderComboEvent(inputEle);
+}
+
+
+//Added by Siddhesh_Chaugule for Group Accounts UX3 Page
+function selectActionForGroup(field) {
+    var localDM = feba.domManipulator;
+    var selectedID = localDM.getAttribute(field, "id");
+    var selectedvalue = field.options[field.selectedIndex].value;
+    if (selectedvalue != "MANAGEGROUP") {
+        document.getElementById("AccountSummaryFG.GROUP_ACTION_MODE").value = selectedvalue;
+        var selectedindex = selectedID.substring(13);
+        document.getElementById("AccountSummaryFG.TABLE_CLICK_INDEX").value = selectedindex;
+        var newButton = localDM.getElementById("Button27469616");
+        localDM.trigger(newButton, "click");
+    }
+}
+
+
+//Added by Neeti for GoalLinkAccounts Screen under PFM
+function goalLinkRadio(element) {
+    if (element == 1) {
+        document.getElementById("reqNewBtn").disabled = true;
+        document.getElementById("reqNewBtn").className = "formbtn_finaceovervw";
+        document.getElementById("reqNewBtn").parentNode.className = "HW_formbtn_lnkaccnt";
+        document.getElementById("GoalAccountLinkFG.ACCOUNT_NUMBER").disabled = false;
+        //document.getElementById("GoalAccountLinkFG.GEN_ACCOUNT_ID").disabled = true;
+    }
+    if (element == 2) {
+        document.getElementById("GoalAccountLinkFG.ACCOUNT_NUMBER").disabled = true;
+        document.getElementById("reqNewBtn").disabled = false;
+        document.getElementById("reqNewBtn").className = "formbtn";
+        document.getElementById("reqNewBtn").parentNode.className = "HW_formbtn";
+        //document.getElementById("GoalAccountLinkFG.GEN_ACCOUNT_ID").disabled = false;
+    }
+}
+
+
+function showHidePriceValue(sel) {
+    var bidType = sel.options[sel.selectedIndex].value;
+    var counter = 0;
+    var bidPerIpo = document.getElementById("BidsPerIpo").value;
+    if (bidType == "CUTV") {
+        while (counter < bidPerIpo) {
+            var bidTypeId = document.getElementById("IPOManagementFG.BID_PRICE_TYPE_ARRAY[" + counter + "]");
+            if (bidTypeId.id == sel.id) {
+                document.getElementById("IPOManagementFG.PRICE_VALUE_ARRAY[" + counter + "]").value = feba.domManipulator.getElementById("HREF_IPOManagementFG.CUT_OFF_PRICE")[0].innerHTML;
+                document.getElementById("IPOManagementFG.PRICE_VALUE_ARRAY[" + counter + "]").disabled = true;
+            }
+            counter = counter + 1;
+        }
+    }
+    else if (bidType == "BIDV" || bidType == "") {
+        while (counter < bidPerIpo) {
+            var bidTypeId = document.getElementById("IPOManagementFG.BID_PRICE_TYPE_ARRAY[" + counter + "]");
+            if (bidTypeId.id == sel.id) {
+                document.getElementById("IPOManagementFG.PRICE_VALUE_ARRAY[" + counter + "]").value = "";
+                document.getElementById("IPOManagementFG.PRICE_VALUE_ARRAY[" + counter + "]").disabled = false;
+            }
+            counter = counter + 1;
+        }
+    }
+}
+
+/* function for IPO Management used to disable the textboxes based upon value selected in dropdown*/
+
+function disableField(source, target1, target2, target3, value, prop) {
+    var property = prop.split(Constants.PARAMETERS_SEPERATOR)[0];
+    var pValue = prop.split(Constants.PARAMETERS_SEPERATOR)[1];
+
+    feba.domManipulator.setAttribute(feba.domManipulator.getElementById(target1), property, pValue);
+    feba.domManipulator.setAttribute(feba.domManipulator.getElementById(target2), property, pValue);
+    feba.domManipulator.setAttribute(feba.domManipulator.getElementById(target3), property, pValue);
+
+    if (feba.domManipulator.getElementById(source).val() == "NSDL") {
+        feba.domManipulator.getElementById(target1).removeAttr(property);
+        feba.domManipulator.getElementById(target2).removeAttr(property);
+
+    }
+    else if (feba.domManipulator.getElementById(source).val() == "CDSL") {
+        feba.domManipulator.getElementById(target3).removeAttr(property);
+
+    }
+    else if (feba.domManipulator.getElementById(source).val() == "") {
+        feba.domManipulator.getElementById(target1).removeAttr(property);
+        feba.domManipulator.getElementById(target2).removeAttr(property);
+        feba.domManipulator.getElementById(target3).removeAttr(property);
+
+    }
+}
+
+// function to add rows and columns in errTable. It will paint only two columns
+function paintErrorInTable(text) {
+    var rowElement = jQuery('[isColumnEmpty]');
+    if (rowElement.length) {
+        rowElement.append(text);
+        rowElement.removeAttr('isColumnEmpty');
+    } else {
+        feba.domManipulator.getElementById('errTable').append('<tr><td style="padding-bottom: 2px;width:50%">' + text + '</td><td isColumnEmpty="true" style="padding-left: 10px;padding-bottom: 2px;width:50%"></td></tr>');
+    }
+}
+
+// function to get value based on key in xml string
+function getDataFromKeyInXML(xmlString, key) {
+    var x = xmlString.split("</" + key);
+    y = x[0].split(key + ">");
+    return y[1];
+}
+
+function eventCall() {
+    jQuery('#FREQ_TYPE_GO').trigger('click')
+
+
+}
+
+function dateCall() {
+    jQuery('#FREQ_TYPE_GO1').trigger('click')
+
+
+}
+
+/* Function added to call a common event on click of a Radio button 
+ in in the Rules List of ApproversDetailsTagHelper. This inturn calls
+ a Common Event to refresh the lookups. */
+function displayLookUpsBasedOnRule(groupletId) {
+    var localDM = feba.domManipulator;
+    localDM.getElement(localDM.getGroupletSpecificElement("SELECT_NEXT_USER_EVENT", groupletId)).trigger('click');
+
+}
+
+
+function enableEnterSubmit() {
+    var localDM = feba.domManipulator;
+    localDM.getElement(':text,:password').keypress(function (e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            submit = false;
+            localDM.getElement(':text,:password,:submit').each(function (key, value) {
+                if (value.id == e.target.id) {
+                    submit = true;
+                }
+                if (submit && value.type == 'submit') {
+                    submit = false;
+                    localDM.getElement(value).trigger('click');
+                }
+            });
+        }
+    });
+}

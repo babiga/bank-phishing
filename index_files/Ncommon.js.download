@@ -1,0 +1,1004 @@
+//****************************************************************************
+// This function determines user-agent. Currently this supports Netscape and
+// MSIE only. However, this function can be enhanced later to support other
+// browsers. In such case the function fsSignedData also can be updated so as
+// to support new browsers.
+// Return value:
+//	returns "ns" in case of netscape user-agent and "msie" in case of IE
+//****************************************************************************
+//PUBLIC
+function fsClientBrowser(){
+	var browserVersion=parseInt(navigator.appVersion);
+	var isIE=navigator.appName.indexOf("Microsoft")!=-1;
+	var isOpera=navigator.userAgent.indexOf("Opera")!=-1;
+	var isSafari=navigator.userAgent.indexOf("Safari")!=-1;
+	var isNetscape=navigator.appName.indexOf("Netscape")!=-1;
+	var isChrome=navigator.userAgent.indexOf("Chrome")!=-1;
+	//Added for call id 565953
+	var isFirefox=navigator.userAgent.indexOf("Firefox")!=-1;
+	/*
+	 * Don't mess with the order. Coz, IE is IE and depending on identification
+	 * here Chrome can be safari and safari and chrome can be NS.
+	 */
+	if(isIE&&browserVersion>=4){
+	return"msie";
+	}else if(isOpera){
+	return"Opera";
+	}else if(isChrome){
+	return("Chrome");
+	}else if(isSafari){
+	return"Safari";
+	}
+	//Added for call id 565953 starts
+	else if(isFirefox){
+	return"Firefox";
+	//Added for call id 565953 ends
+	}else if(isNetscape&&browserVersion>=4){
+	return"ns";
+	}}
+
+
+var BrowserDetect = {
+		init: function () {
+			this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+			this.version = this.searchVersion(navigator.userAgent)
+				|| this.searchVersion(navigator.appVersion)
+				|| "an unknown version";
+			this.OS = this.searchString(this.dataOS) || "an unknown OS";
+		},
+		searchString: function (data) {
+			for (var i=0;i<data.length;i++)	{
+				var dataString = data[i].string;
+				var dataProp = data[i].prop;
+				this.versionSearchString = data[i].versionSearch || data[i].identity;
+				if (dataString) {
+					if (dataString.indexOf(data[i].subString) != -1)
+						return data[i].identity;
+				}
+				else if (dataProp)
+					return data[i].identity;
+			}
+		},
+		searchVersion: function (dataString) {
+			var index = dataString.indexOf(this.versionSearchString);
+			if (index == -1) return;
+			return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+		},
+		dataBrowser: [
+			{
+				string: navigator.userAgent,
+				subString: "Chrome",
+				identity: "Chrome"
+			},
+			{ 	string: navigator.userAgent,
+				subString: "OmniWeb",
+				versionSearch: "OmniWeb/",
+				identity: "OmniWeb"
+			},
+			{
+				string: navigator.vendor,
+				subString: "Apple",
+				identity: "Safari",
+				versionSearch: "Version"
+			},
+			{
+				prop: window.opera,
+				identity: "Opera",
+				versionSearch: "Version"
+			},
+			{
+				string: navigator.vendor,
+				subString: "iCab",
+				identity: "iCab"
+			},
+			{
+				string: navigator.vendor,
+				subString: "KDE",
+				identity: "Konqueror"
+			},
+			{
+				string: navigator.userAgent,
+				subString: "Firefox",
+				identity: "Firefox"
+			},
+			{
+				string: navigator.vendor,
+				subString: "Camino",
+				identity: "Camino"
+			},
+			{		// for newer Netscapes (6+)
+				string: navigator.userAgent,
+				subString: "Netscape",
+				identity: "Netscape"
+			},
+			{
+				string: navigator.userAgent,
+				subString: "MSIE",
+				identity: "Explorer",
+				versionSearch: "MSIE"
+			},
+			{
+				string: navigator.userAgent,
+				subString: "Gecko",
+				identity: "Mozilla",
+				versionSearch: "rv"
+			},
+			{ 		// for older Netscapes (4-)
+				string: navigator.userAgent,
+				subString: "Mozilla",
+				identity: "Netscape",
+				versionSearch: "Mozilla"
+			}
+		],
+		dataOS : [
+			{
+				string: navigator.platform,
+				subString: "Win",
+				identity: "Windows"
+			},
+			{
+				string: navigator.platform,
+				subString: "Mac",
+				identity: "Mac"
+			},
+			{
+				   string: navigator.userAgent,
+				   subString: "iPhone",
+				   identity: "iPhone/iPod"
+		    },
+			{
+				string: navigator.platform,
+				subString: "Linux",
+				identity: "Linux"
+			}
+		]
+
+	};
+	BrowserDetect.init();
+/*******************************************************************************
+ * This method is used to get the elementId appended with the groupletId.
+ *
+ ******************************************************************************/
+function getGroupletSpecificId(elementId,groupletId){
+	if(groupletId!="null"&&groupletId!=null&&groupletId!=undefined) {
+		if(elementId.indexOf(groupletId+Grouplet_Seperator)==-1) {
+		  elementId = groupletId+Grouplet_Seperator+elementId;
+		}
+	}
+	return elementId;
+}
+
+// This is a helper object for activities related to collapsible divs.
+var hideSeekHelper = {
+	SLIDE_MODE_RIGHT : "right",
+	SLIDE_MODE_LEFT : "left",
+	SLIDE_MODE_UP : "up",
+	SLIDE_MODE_DOWN : "down",
+	SLIDE_MODE_ATTRIB : "data-slideMode",
+	DEFAULT_STATE_ATTRIB : "data-defaultState",
+	RETAIN_STATE_ATTRIB : "data-retainCollapsible",
+	ANIMATE_ATTRIB : "data-animate",
+	COLLAPSE_CLICKED_OUTSIDE_ATTRIB : "data-collapseOnClickOutside",
+	MAKE_OVERLAY_ATTRIB : "data-makeOverlay",
+	RIGHT_ARROW_IMAGE : "right_arrow_double.png",
+	LEFT_ARROW_IMAGE : "left_arrow_double.png",
+	PLUS_IMAGE : "plus.gif",
+	MINUS_IMAGE : "minus.gif",
+	GROUPLET_SEPERATOR : ':',
+	COLLAPSIBLE_SEPERATOR : '--:--',
+	COLLAPSIBLE_IMG_ID_SUFFIX : ".collapsibleImage",
+	invertSlidemode : function(mode) {
+		switch (mode) {
+		case this.SLIDE_MODE_RIGHT:
+			return this.SLIDE_MODE_LEFT;
+			break;
+		case this.SLIDE_MODE_LEFT:
+			return this.SLIDE_MODE_RIGHT;
+			break;
+		case this.SLIDE_MODE_UP:
+			return this.SLIDE_MODE_DOWN;
+			break;
+		case this.SLIDE_MODE_DOWN:
+			return this.SLIDE_MODE_UP;
+			break;
+		default:
+			return this.SLIDE_MODE_UP;
+			break;
+		}
+	},
+	updateIndicatorImage : function (img, indicatedAction) {
+		var imgName, imgAltText;
+		switch (indicatedAction) {
+		case this.SLIDE_MODE_RIGHT:
+			imgName = hideSeekHelper.RIGHT_ARROW_IMAGE;
+			imgAltText = imageAltRightArrow;
+			break;
+		case this.SLIDE_MODE_LEFT:
+			imgName = hideSeekHelper.LEFT_ARROW_IMAGE;
+			imgAltText = imageAltLeftArrow;
+			break;
+		case this.SLIDE_MODE_UP:
+			imgName = hideSeekHelper.MINUS_IMAGE;
+			imgAltText = imageAltMinus;
+			break;
+		case this.SLIDE_MODE_DOWN:
+			imgName = hideSeekHelper.PLUS_IMAGE;
+			imgAltText = imageAltPlus;
+			break;
+		}
+
+		img.src = imagePath + "/" + imgName;
+		img.alt = imgAltText;
+	},
+	sanitizeValue : function(value) {
+		switch(value) {
+		case "null":
+			return null;
+			break;
+		case "false":
+			return false;
+			break;
+		case "true":
+			return true;
+			break;
+		default:
+			return value;
+			break;
+		}
+	}
+}
+/*******************************************************************************
+ * This method is called at the page load if the page has collapsible content.
+ * It collapses and expands the divs depending upon state mentioned in the
+ * hidden variable.
+ *
+ ******************************************************************************/
+function initHideSeek(groupletId, isModalRequest) {
+	/**
+	 * slideMode - Added to support Sliding Panel with different modes -
+	 * right (slide from left to right), left, up or down
+	 */
+	var domMan = feba.domManipulator;
+	// Get collapsible elements list.
+	var collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS',groupletId);
+	if (isModalRequest == true || isModalRequest == "true") {
+		collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS','MODAL_VIEW_CONTAINER');
+	}
+	var allCollapsibleIdsList=domMan.getAttribute(collapsibleId,"value");
+
+	if(!allCollapsibleIdsList){
+		return; // Return if no collapsible elements
+	}
+
+	var collapsibles = allCollapsibleIdsList.split(hideSeekHelper.COLLAPSIBLE_SEPERATOR);
+	var collapsibleIdsList = collapsibles[0];
+
+	// Get list of all collapsible element configs
+	var diffCollapse = collapsibleIdsList.split("|"); //TODO Change the name
+
+	for (var i = 0; i < diffCollapse.length; i++) {
+		if (!diffCollapse[i]) {
+			continue; // skip if collpsible element is falsy, mostly "".
+		}
+
+		var divIdArr = diffCollapse[i].split(","); // TODO Change name: collapsibleConfig
+		var sourceDivId = divIdArr[0].replace("MODAL_VIEW_CONTAINER:",""); // TODO change name sourceElement (isnt a div, but h)
+		var targetDivId = "", targetDiv;
+		if(divIdArr[1]){
+			targetDivId = divIdArr[1].replace(/MODAL_VIEW_CONTAINER:/g,"");
+		}
+
+		if (sourceDivId && targetDivId) {
+			var state = divIdArr[2],
+				sourceElement = domMan.getElementById(sourceDivId),
+				anchor = domMan.getChildren(sourceElement, "a"),
+				slideMode = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.SLIDE_MODE_ATTRIB)),
+				defaultState = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.DEFAULT_STATE_ATTRIB)),
+				retainCollapsible = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.RETAIN_STATE_ATTRIB)),
+				animate = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.ANIMATE_ATTRIB)),
+				collapseClickedOutside = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.COLLAPSE_CLICKED_OUTSIDE_ATTRIB)),
+				makeOverlay = hideSeekHelper.sanitizeValue(domMan.getAttribute(anchor, hideSeekHelper.MAKE_OVERLAY_ATTRIB));
+
+			//Handle RTL animations
+			if ((slideMode === hideSeekHelper.SLIDE_MODE_LEFT || slideMode === hideSeekHelper.SLIDE_MODE_RIGHT) &&
+					(anchor.css("direction") === "rtl")) {
+				slideMode = hideSeekHelper.invertSlidemode(slideMode);
+			}
+
+			// add the data and use it directly, instead of passing values again..!
+			domMan.addData(anchor, "collapsibleData", {
+				slideMode: slideMode,
+				retainCollapsible:retainCollapsible,
+				animate:animate,
+				collapseClickedOutside:collapseClickedOutside,
+				makeOverlay: makeOverlay
+				}
+			);
+
+			if(defaultState && defaultState !== "null") {
+				state = defaultState;
+				saveCollapsibleState(true, collapsibleId, targetDivId, state);
+			}
+
+			// Checks if the targetDivId has some Business Exception, then change the state to 'E'
+			if(hasBusinessException(targetDivId)) {
+        		state = "E";
+        		saveCollapsibleState(true, collapsibleId, targetDivId, state);
+        	}
+
+			if (targetDivId.indexOf("#") != -1) {
+				targetDivId = targetDivId.substring(targetDivId.indexOf("#")+1);
+			}
+
+			targetDiv = document.getElementById(targetDivId);
+
+			if (targetDiv != null) {
+				if (state == "E") {
+					expandBlock(targetDiv, slideMode, animate, collapseClickedOutside, makeOverlay, anchor, true);
+				} else {
+					collapseBlock(targetDiv, slideMode, animate, true);
+				}
+
+				//jQuery(targetDiv).parents(".stage3_searchpanel_detailsdiv, .stage3_searchpaneldiv").show();
+				domMan.showElement(domMan.parents(targetDiv, ".stage3_searchpanel_detailsdiv, .stage3_searchpaneldiv"));
+			}
+		}
+	}
+	if (collapsibles.length > 1) { // TODO check! was 'temp'!
+		var tableCollapsibleIdsList = collapsibles[1];
+		//modified for call 451220, 457551 starts
+		//diffCollapse = collapsibleIdsList.split("|"); // TODO Change the name
+		diffCollapse = tableCollapsibleIdsList.split("|");
+		//modified for call 451220, 457551 ends
+		for (var i = 0; i < diffCollapse.length; i++) {
+			if (!diffCollapse[i]) {
+				continue; // skip if collapsible element is falsy, mostly "".
+			}
+
+			var divIdArr = diffCollapse[i].split(","); // TODO Change name: collapsibleConfig
+			var sourceDivId = divIdArr[0];// TODO change name sourceElement (isnt a div, but h)
+			var targetDivId = divIdArr[1];
+
+			if (sourceDivId && targetDivId) {
+				var state = divIdArr[2];
+
+				if (document.getElementById(targetDivId) != null) {
+					var collapsibleImg = document.getElementById(targetDivId + hideSeekHelper.COLLAPSIBLE_IMG_ID_SUFFIX);
+					if (state == "E") {
+							document.getElementById(targetDivId).style.display = "";
+							collapsibleImg.src = imagePath + "/"+hideSeekHelper.MINUS_IMAGE;
+							collapsibleImg.alt = imageAltPlus;
+							collapsibleImg.title = imageTitleCollapse;
+					} else {
+							document.getElementById(targetDivId).style.display = "none";
+							collapsibleImg.src = imagePath + "/"+hideSeekHelper.PLUS_IMAGE;
+							collapsibleImg.alt = imageAltPlus;
+							collapsibleImg.title = imageTitleExpand;
+					}
+				}
+			}
+		}
+	}
+}
+/*******************************************************************************
+ * This method is called on click of the collapsible header. It
+ * collapses/expands the particular div and also changes the image from plus to
+ * minus and vice versa.
+ *
+ ******************************************************************************/
+function expandCollapse(sourceId, targetDivId, variable, groupletId, isModalRequest, event) {
+	if (groupletId == "null"){
+		groupletId = null;
+	}
+
+	event = event || window.event;
+
+	if (targetDivId.indexOf("#") != -1) {
+		targetDivId = targetDivId.substring(targetDivId.indexOf("#")+1);
+	}
+	var domMan = feba.domManipulator;
+	var collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS',groupletId);
+	if (isModalRequest==true || isModalRequest=="true"){
+		collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS','MODAL_VIEW_CONTAINER');
+	}
+	var collapsible=domMan.getAttribute(collapsibleId,"value");
+	targetDivId = domMan.getAttribute(domMan.getGroupletSpecificElement(targetDivId,groupletId),"id");
+	var unUsedValue;
+
+	var collapsibles = collapsible.split(hideSeekHelper.COLLAPSIBLE_SEPERATOR);
+	if (variable == 'tableColapse') {
+		collapsible = collapsibles[1];
+		unUsedValue = collapsibles[0];
+		var state = collapsible.substring(collapsible.lastIndexOf(targetDivId + ",") + targetDivId.length + 1, collapsible.lastIndexOf(targetDivId + ",") + targetDivId.length + 2);
+		if (state == "E") {
+			document.getElementById(targetDivId).style.display = "none";
+			document.getElementById(targetDivId + '.collapsibleImage').src = imagePath + "/plus.gif";
+			document.getElementById(targetDivId + '.collapsibleImage').alt = imageAltPlus;
+			document.getElementById(targetDivId + '.collapsibleImage').title = imageTitleExpand;
+			collapsible = collapsible.replace(targetDivId + ',E', targetDivId + ',C');
+			collapsibleId.value = unUsedValue+hideSeekHelper.COLLAPSIBLE_SEPERATOR+collapsible;
+		} else {
+			document.getElementById(targetDivId).style.display = "";
+			document.getElementById(targetDivId + '.collapsibleImage').src = imagePath + "/minus.gif";
+			document.getElementById(targetDivId + '.collapsibleImage').alt = imageAltMinus;
+			document.getElementById(targetDivId + '.collapsibleImage').title = imageTitleCollapse;
+			collapsible = collapsible.replace(targetDivId + ',C', targetDivId + ',E');
+			collapsibleId.value = unUsedValue+hideSeekHelper.COLLAPSIBLE_SEPERATOR+collapsible;
+		}
+	} else {
+		collapsible = collapsibles[0];
+
+		var sourceElement = domMan.getElementById(sourceId),
+			anchor = domMan.getChildren(sourceElement, "a"),
+			collapsibleData = domMan.getData(anchor, "collapsibleData");
+
+		state = feba.domManipulator.getChildren(document.getElementById(targetDivId),":not(:header):visible").length?"E":"C";
+
+		if (state == "E") {
+			collapseBlock(document.getElementById(targetDivId), collapsibleData.slideMode, collapsibleData.animate);
+			saveCollapsibleState(collapsibleData.retainCollapsible, collapsibleId, targetDivId, "C");
+		} else {
+			expandBlock(document.getElementById(targetDivId),
+					collapsibleData.slideMode, collapsibleData.animate,
+					collapsibleData.collapseClickedOutside, collapsibleData.makeOverlay, anchor);
+
+			saveCollapsibleState(collapsibleData.retainCollapsible, collapsibleId, targetDivId, "E");
+		}
+	}
+	//Need to look into below code. Thought it wont be useful
+	if (variable == 'tableColapse') {
+		if (unUsedValue != undefined) {
+			// Fixed reference error for Collapsible_Seperator
+			collapsible = unUsedValue + hideSeekHelper.Collapsible_Seperator + collapsible;
+		}
+	} else {
+		if (unUsedValue != undefined) {
+			collapsible = collapsible + hideSeekHelper.Collapsible_Seperator + unUsedValue;
+		}
+	}
+	collapsible=feba.domManipulator.getAttribute(feba.domManipulator.getGroupletSpecificElement('COLLAPSIBLE_IDS',groupletId),"value");
+	return false;
+}
+
+/*******************************************************************************
+ * This method collapses all the elements in a div except the header element.
+ ******************************************************************************/
+function collapseBlock(targetDiv, slideMode, animate, forceNoAnimate) {
+
+	var hideElements = feba.domManipulator.getChildren(targetDiv,":not(:header)");
+	var keepVisible = feba.domManipulator.getChildren(targetDiv,":header");
+
+	if (animate && !forceNoAnimate) {
+		hideElements.stop().hide("slide", {direction: hideSeekHelper.invertSlidemode(slideMode)}, 500);
+	} else {
+		hideElements.stop().hide();
+	}
+
+	// Fix for the jQuery UI hide-show issue that wraps elements in a div and
+	// frequent clicks will lose the div, permanently hidden in the clutter
+	feba.domManipulator.getChildren(targetDiv,":not(:header)").find(".ui-effects-wrapper").children().unwrap();
+
+	var collapsibleIndImage = document.getElementById(targetDiv.id + '.collapsibleImage');
+	if (collapsibleIndImage) {
+		hideSeekHelper.updateIndicatorImage(collapsibleIndImage, slideMode?slideMode:hideSeekHelper.SLIDE_MODE_DOWN);
+		collapsibleIndImage.title = imageTitleExpand;
+	}
+}
+/*******************************************************************************
+ * This method expands all the elements in a div except the header element.
+ ******************************************************************************/
+function expandBlock(targetDiv, slideMode, animate, collapseClickedOutside, makeOverlay, anchor, forceNoAnimate) {
+
+
+	var hideElements = feba.domManipulator.getChildren(targetDiv,":not(script[type=text/javascript]):not(:header)");
+	var keepVisible = feba.domManipulator.getChildren(targetDiv,":header");
+
+
+	if (makeOverlay && !hideElements.is(".collapsible-wrapper")) {
+		hideElements = hideElements.wrapAll("<div class='collapsible-wrapper'>").show().parent();
+	}
+
+	if (animate && !forceNoAnimate) {
+		hideElements.stop().show("slide", {direction: hideSeekHelper.invertSlidemode(slideMode)}, 500, insideExpandBlock);
+	} else {
+		hideElements.stop().show();
+		setTimeout(insideExpandBlock, 0);
+	}
+
+	function insideExpandBlock() {
+		// Fix for the jQuery UI hide-show issue that wraps elements in a div and
+		// frequent clicks will lose the div, permanently hidden in the clutter
+		feba.domManipulator.getChildren(targetDiv,":not(:header)").find(".ui-effects-wrapper").children().unwrap();
+
+		// To not retain the value in the closure call for hiding.
+		forceNoAnimate = undefined;
+
+		var collapsibleIndImage = document.getElementById(targetDiv.id + '.collapsibleImage');
+		if (collapsibleIndImage) {
+			// No need to send default slide mode from here, by default the invert method sends slidemode UP!
+			hideSeekHelper.updateIndicatorImage(collapsibleIndImage, hideSeekHelper.invertSlidemode(slideMode));
+			collapsibleIndImage.title = imageTitleCollapse;
+		}
+
+		if (collapseClickedOutside) {
+			feba.js.common.documentClickWatcher.register(anchor, {
+				callBack: collapsibleDocClickHandler,
+				anchor: anchor,
+				targetDiv: targetDiv,
+				slideMode: slideMode,
+				animate: animate
+			});
+		}
+	}
+}
+
+// Save state of collapsible ids to the form field conditionally.
+function saveCollapsibleState(saveState, collapsibleId, targetDivId, newState) {
+	if (!saveState) {
+		return;
+	}
+
+	var allCollapsibleIdsList=feba.domManipulator.getAttribute(collapsibleId, "value");
+	feba.domManipulator.val(collapsibleId, allCollapsibleIdsList.replace(new RegExp(targetDivId+",."),targetDivId+","+newState));
+}
+
+// Handle click outsied of the collapsible div, if it is being watched for as per the collapsible config
+function collapsibleDocClickHandler(config, event) {
+//	if (jQuery(config.targetDiv).has(event.target).length === 0 && !jQuery(event.target).is(".ui-widget li.ui-menu-item a")) {
+	var domMan = feba.domManipulator;
+//isCalenderTarget and isModalWindowOpened is checked sothat serach panel should not collapsed in case if Modal Window is opened or Date Picker Calender is opened
+	var isCalenderTarget = false;
+	var isModalWindowOpened = false;
+	//check for IE9 and below is added. Fix for Ticket 712675 in 11011
+	var isIe9AndBelow = false;
+	var isIE = navigator.appName.indexOf("Microsoft") != -1;
+	if(isIE != null && isIE == true) {
+		var indexOfMSIE = window.navigator.userAgent.indexOf("MSIE ");
+		var	ua = window.navigator.userAgent;
+		if(indexOfMSIE > 0) {
+			if(parseInt(ua.substring(indexOfMSIE + 5, ua.indexOf(".", indexOfMSIE))) < 10) {
+				isIe9AndBelow = true;
+			}
+		}
+	}
+	//className property is used for IE9 and below as classList property is not available. Fix for Ticket 712675 in 11011
+	if(isIe9AndBelow) {
+		if((event.target.className != null && event.target.className.split(/[ ,]+/).length >= 2) && (event.target.className.split(/[ ,]+/)[1].indexOf("calendars") == 0)){
+			isCalenderTarget = true;
+		} else if((event.target.className != null && event.target.className.split(/[ ,]+/).length == 1) && (event.target.className.split(/[ ,]+/)[0].indexOf("calendars") == 0)){
+			isCalenderTarget = true;
+		} else if(event.target.offsetParent != null && (event.target.offsetParent.className.indexOf("calendars-popup") == 0)){
+			isCalenderTarget = true;
+		}
+	} else {
+		if((event.target.classList != null && event.target.classList.length >= 2) && (event.target.classList[1].indexOf("calendars") == 0)){
+			isCalenderTarget = true;
+		} else if((event.target.classList != null && event.target.classList.length == 1) && (event.target.classList[0].indexOf("calendars") == 0)){
+			isCalenderTarget = true;
+		} else if(event.target.offsetParent != null && (event.target.offsetParent.className.indexOf("calendars-popup") == 0)){
+			isCalenderTarget = true;
+		}
+	}
+	if(document.getElementById('MODAL_VIEW_CONTAINER') != null ){
+		isModalWindowOpened = true;
+	}
+
+	if (domMan.getMatchedElementCount(domMan.hasElementsMatching(config.targetDiv, event.target)) == 0
+			&& !domMan.isMatching(event.target, ".ui-widget li.ui-menu-item a")  && !isCalenderTarget && !isModalWindowOpened) {
+		feba.js.common.documentClickWatcher.deregister(config.anchor);
+		collapseBlock(config.targetDiv, config.slideMode, config.animate);
+	//} else if (jQuery(config.anchor).has(event.target).length) {
+	} else if (domMan.getMatchedElementCount(domMan.hasElementsMatching(config.anchor, event.target))) {
+		feba.js.common.documentClickWatcher.deregister(config.anchor);
+	}
+};
+function getSectionBasedIds(collapsibleids,targetId){
+	var sectionId=targetId;
+	var onlySections=false;
+	if(targetId.indexOf(".")!=-1){
+	sectionId=targetId.substring(0,targetId.indexOf("."));
+	alert(sectionId);
+	onlySections=false;
+	}else{
+	onlySections=true;
+	}
+	var splitted = collapsibleids.split("|");
+	if (splitted.length > 0) {
+		for (var i = 0;			i < splitted.length;			i++) {
+			if (onlySections == true) {}
+
+		}
+	}
+}
+function format(){
+	var buttons=document.getElementById("BrdCrumbNImg").parentNode;
+	buttons.removeChild(document.getElementById("BrdCrumbNImg"));
+	var input=document.getElementsByTagName("a");
+	var count=input.length;
+	for (var i = 0;		i < count;		i++) {
+		input[i].removeAttribute("href");
+		input[i].setAttribute("class", "simpletext");
+	}
+	var rad_input = document.getElementsByTagName("input");
+	var rad_count = rad_input.length;
+	for (var j = 0; j < rad_count; j++) {
+		if (document.getElementsByTagName("input")[j].getAttribute("type") == "radio" || document.getElementsByTagName("input")[j].getAttribute("type") == "RADIO") {
+			document.getElementsByTagName("input")[j].style.display = "none";
+		}
+	}
+}
+
+function format(name,theFormattedDate){
+
+var trial = feba.domManipulator.remove(feba.domManipulator.getElementById(name+':'+"BrdCrumbNImg")) ;
+
+
+
+}
+function addDate(theFormattedDate,name){
+
+
+var date = document.createTextNode(theFormattedDate);
+
+document.getElementById(''+name+':'+'PgHeading').appendChild(date);
+
+
+
+}
+
+
+function PrintPreView(divs,css,title,jsFile,nameSpace,portalName,theFormattedDate) {
+
+
+	var tableName = divs.split("|");
+	var total_document="";
+var portalName1 = portalName;
+	total_document = document.getElementById('PrintPreview'+'_'+portalName1).innerHTML + '<div class="clearboth"></div><BR>';
+     var name = nameSpace;
+
+
+	var disp_setting="toolbar=no,location=no,directories=no,menubar=no,";
+	    disp_setting+="scrollbars=yes,width=640, height=660, left=200, top=25";
+
+	var docprint = window.open("","",disp_setting);
+		docprint.document.open();
+		docprint.document.write('<html><head><title>');
+		docprint.document.write(title);
+		docprint.document.write('</title>');
+		docprint.document.write('<link rel="stylesheet" type="text/css" href="/corp/'+css+'">');
+		docprint.document.write('<link rel="stylesheet" type="text/css" href="/corp/'+langID+'/'+css+'">');
+		docprint.document.write('<script type=\'text/javaScript\' src=\'/corp/scripts/common/Ncommon.js\'></script>');
+        docprint.document.write('<script type=\'text/javaScript\' src=\'/corp/scripts/common/NFEBAScripts.js?moduleId=,scriptsPath=/corp/scripts,isVdtMode=,nodePath=,ipAddress=,contextPath=\'></script>');
+		docprint.document.write('</head>');
+				docprint.document.write('<body style="background-color:#FFFFFF" onLoad = "format(\''+name+'\',\''+theFormattedDate+'\');addDate(\''+theFormattedDate+'\',\''+name+'\');window.print();">');
+//docprint.document.write('<body style="background-color:#FFFFFF" onLoad = "format()">');
+		docprint.document.write(total_document);
+		docprint.document.write('<BR>')
+		docprint.document.write('<center><input type="button" class="formbtn_last" onclick="javascript:window.close();" value="Close"/></center>');
+
+		var head= docprint.document.getElementsByTagName('head')[0];
+		var script= docprint.document.createElement('script');
+		script.type= 'text/javascript';
+		script.src= jsFile;
+		head.appendChild(script);
+		docprint.document.write('</body></html>');
+		docprint.document.close();
+		docprint.focus();
+}
+
+
+/*******************************************************************************************
+ * This function is called to bind the click event to clear button when the page is ready.
+ *******************************************************************************************/
+//jQuery(document).ready(function (){
+feba.domManipulator.documentReady(function (){
+
+
+	feba.js.adaptive.arcot.initArcotDNA();
+
+	feba.domManipulator.bind(LIB.__GET_ELEMENT_BY_ATTRIBUTE__("data-byPassValidations","true"),"click", function(){
+
+		// All input element with type as text are fetched.
+		var inputElements = feba.domManipulator.getElement("input:text");
+		var iLength = inputElements.length;
+
+		if(inputElements.length>0)
+		{
+				for(var i = 0; i< iLength; i++)
+				{
+					 //On the basis of input element id fetched setting the values of fields as blank on click of clear button.
+					 feba.domManipulator.setAttribute(feba.domManipulator.getElementById(inputElements[i].id),"value","")	;
+
+				}
+		}
+
+
+	});
+
+	//changes end
+
+
+});
+
+/*******************************************************************************
+ * This function checks if the given divId has Business Exception in it
+*  and returns the flag accordingly
+ ******************************************************************************/
+function hasBusinessException(targetDivId){
+	if (targetDivId != null && targetDivId.indexOf("#") != -1) {
+		var temp = targetDivId.split("#");
+		targetDivId = temp[0];
+	}
+	var busExErrorFlag = false;
+
+		/*	check hidden input elements ID - ERROR_ROW_*
+			It gets appended from Field.java in case of FIELD_MSG_DISPLAY_LOCATION as SIDE or
+			ERR_HIGHLIGHT_LOCATION as ROW set in BankAway.properties
+		*/
+		var errorElements = feba.domManipulator.find(feba.domManipulator.getElementById(targetDivId),'input[id^="ERROR_ROW_"]');
+		if((errorElements != null) && (errorElements.length > 0)){
+			busExErrorFlag = true;
+		}
+
+
+		if(busExErrorFlag == false){
+			/*	Then check for error_highlight or error_highlight_right style
+				which gets added to span from LabelForControl.java in case of
+				ERR_HIGHLIGHT_LOCATION as LABEL
+			*/
+			var errorHighlight = jQuery(targetDivId).find(".error_highlight");
+			var errorHighlightRight = jQuery(targetDivId).find(".error_highlight_right");
+			if(errorHighlight.length > 0 || errorHighlightRight.length > 0){
+				busExErrorFlag = true;
+			}
+		}
+	return busExErrorFlag;
+}
+
+/** Added by Nikita for For additional details Link*/
+function displayAdditional()
+{
+	var divElement = feba.domManipulator.getElementById('DataEntry_LeftContainer_Stage3_Collapsible8');
+	var header = feba.domManipulator.getElementById('DataEntry_LeftContainer_Stage39.Re6');
+    var formgroupName = document.getElementById('FORMSGROUP_ID__').value;
+    var clickVal = feba.domManipulator.getElementById('Additional_Click');
+    var clickLink = document.getElementById(formgroupName+".CLICKED_PAGE_NO").value;
+   	clickVal.click(function(){
+	   		//When link is clicked set formfield as 'Y' indicating link has been clicked
+	   		document.getElementById(formgroupName+".CLICKED_PAGE_NO").value = "Y";
+   		}
+   	)
+    if(divElement.length==0)
+    {
+    	return;
+    }
+	else
+	{   //When page is loaded show the section of Additional details as collapsed
+		if(clickLink == "N")
+      	{
+			divElement[0].style.display = "None";
+	    }
+	    //When link is clicked the Additional details section is expanded and Link is hidden
+	    else
+	    {
+	   		header[0].style.display ="None";
+   			divElement[0].style.display = "block";
+	    }
+ 	}
+}
+/*For additional details Link end*/
+
+/** Added by Nikita for User Added Bank checkbox */
+function useSavedAddress()
+{
+	var formgroupName = document.getElementById('FORMSGROUP_ID__').value;
+  	var useSaved = !(document.getElementById('CounterPartyCRUDFG.USER_ADDED_BANK').checked);
+  	var countryElement = feba.domManipulator.getElementById('CounterPartyCRUDFG.BNF_BANK_COUNTRY');
+  	var networkElement = feba.domManipulator.getElementById('CounterPartyCRUDFG.NETWORK_ID');
+  	//If the user added bank checkbox is checked then enable fields and clear Network and bank Identifier
+	//Clear all fields when checkbox is checked or unchecked
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_COUNTRY').value = "";
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_NAME').value = "";
+	document.getElementById('CounterPartyCRUDFG.BNF_OTHERBANK_BRANCH').value = "";
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_ADDRESS').value = "";
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_CITY').value = "";
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_ZIP').value = "";
+	document.getElementById('CounterPartyCRUDFG.NETWORK_ID').value = "";
+	document.getElementById('CounterPartyCRUDFG.BANK_IDENTIFIER').value = "";
+	//Update the value of the dropdowns to default value
+	jQuery(networkElement).febaCombobox("update");
+	jQuery(countryElement).febaCombobox("update");
+	feba.js.watermark.showWatermark();
+	//Set fields as readOnly according to the selection of checkbox
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_NAME').readOnly = useSaved;
+	document.getElementById('CounterPartyCRUDFG.BNF_OTHERBANK_BRANCH').readOnly = useSaved;
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_ADDRESS').readOnly = useSaved;
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_CITY').readOnly = useSaved;
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_ZIP').readOnly = useSaved;
+	//Disable dropdown for Country when box is unchecked
+	document.getElementById('CounterPartyCRUDFG.BNF_BANK_COUNTRY').disabled = useSaved;
+	if(useSaved)
+	{
+		jQuery(countryElement).febaCombobox("disable");
+	}
+	else
+	{
+		jQuery(countryElement).febaCombobox("enable");
+	}
+
+   return;
+}
+/** Added by Nikita for User Added Bank checkbox END*/
+
+//Script to show Menu options on mouse over
+function showLinks(parentID,ulID,divID)
+{
+		//Get Parent Div Element
+		var parentDiv = document.getElementById(parentID);
+		//Get Inner Div Element
+		var div = document.getElementById(divID);
+		//Get UL element
+		var showULId = document.getElementById(ulID);
+
+		//Fetch left position of parent
+		var parent_left = parentDiv.offsetLeft;
+
+		//Get Parent Height and assign div top position accordingly
+		var parent_Height = parentDiv.offsetHeight;
+		div.style.top = parent_Height+'px';
+
+		//Fetch UL width
+		if(showULId!=null){
+		var width = showULId.style.width.replace('px','');
+		}
+		if(parent_left > (width/2)){
+			//Assign Div left position according to parent div and div width
+			div.style.left = parent_left-(width/2)+'px';
+		}else{
+			div.style.left = '5px';
+		}
+		//Show UL Display
+		showULId.style.display = 'block';
+}
+
+//Script to show Menu options on mouse out
+function hideLinks(ulID)
+{
+		var showULId = document.getElementById(ulID);
+		if(showULId!=null){
+		showULId.style.display = 'none';
+		}
+}
+
+function expandCollapseGroups(sourceId, targetDivId, variable, groupletId, isModalRequest, event) {
+	if (groupletId == "null"){
+		groupletId = null;
+	}
+
+	event = event || window.event;
+
+	if (targetDivId.indexOf("#") != -1) {
+		targetDivId = targetDivId.substring(targetDivId.indexOf("#")+1);
+	}
+
+	var domMan = feba.domManipulator;
+
+	var collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS',groupletId);
+	if (isModalRequest==true || isModalRequest=="true"){
+		collapsibleId=domMan.getGroupletSpecificElement('COLLAPSIBLE_IDS','MODAL_VIEW_CONTAINER');
+	}
+	var collapsible=domMan.getAttribute(collapsibleId,"value");
+	targetDivId = domMan.getAttribute(domMan.getGroupletSpecificElement(targetDivId,groupletId),"id");
+	var unUsedValue;
+
+	var collapsibles = collapsible.split(hideSeekHelper.COLLAPSIBLE_SEPERATOR);
+	if (variable == 'tableColapse') {
+		collapsible = collapsibles[1];
+		unUsedValue = collapsibles[0];
+		var state = collapsible.substring(collapsible.lastIndexOf(targetDivId + ",") + targetDivId.length + 1, collapsible.lastIndexOf(targetDivId + ",") + targetDivId.length + 2);
+
+		if (state == "E") {
+			// Modified to resolve issue faced during Sanity of 11.0.8Base due to changes in HWListTable Start
+			var elements = document.getElementsByClassName(targetDivId);
+    			for(var i = 0, length = elements.length; i < length; i++) {
+       				elements[i].style.display = 'none';
+    			}
+			//document.getElementById(targetDivId).style.display = "none";
+			// Modified to resolve issue faced during Sanity of 11.0.8Base due to changes in HWListTable End
+
+			document.getElementById(targetDivId + '.collapsibleImage').src = imagePath + "/icoToggleDown.png";
+			document.getElementById(targetDivId + '.collapsibleImage').alt = imageAltPlus;
+			document.getElementById(targetDivId + '.collapsibleImage').title = imageTitleExpand;
+			collapsible = collapsible.replace(targetDivId + ',E', targetDivId + ',C');
+			collapsibleId.value = unUsedValue+hideSeekHelper.COLLAPSIBLE_SEPERATOR+collapsible;
+		} else {
+			// Modified to resolve issue faced during Sanity of 11.0.8Base due to changes in HWListTable Start
+			var elements = document.getElementsByClassName(targetDivId);
+    			for(var i = 0, length = elements.length; i < length; i++) {
+       				elements[i].style.display = '';
+    			}
+			//document.getElementById(targetDivId).style.display = "";
+			// Modified to resolve issue faced during Sanity of 11.0.8Base due to changes in HWListTable End
+
+			document.getElementById(targetDivId + '.collapsibleImage').src = imagePath + "/icoToggleUp.png";
+			document.getElementById(targetDivId + '.collapsibleImage').alt = imageAltMinus;
+			document.getElementById(targetDivId + '.collapsibleImage').title = imageTitleCollapse;
+			collapsible = collapsible.replace(targetDivId + ',C', targetDivId + ',E');
+			collapsibleId.value = unUsedValue+hideSeekHelper.COLLAPSIBLE_SEPERATOR+collapsible;
+		}
+	} else {
+		collapsible = collapsibles[0];
+
+		var sourceElement = domMan.getElementById(sourceId),
+			anchor = domMan.getChildren(sourceElement, "a"),
+			collapsibleData = domMan.getData(anchor, "collapsibleData");
+
+		state = feba.domManipulator.getChildren(document.getElementById(targetDivId),":not(:header):visible").length?"E":"C";
+
+		if (state == "E") {
+			collapseBlock(document.getElementById(targetDivId), collapsibleData.slideMode, collapsibleData.animate);
+			saveCollapsibleState(collapsibleData.retainCollapsible, collapsibleId, targetDivId, "C");
+		} else {
+			expandBlock(document.getElementById(targetDivId),
+					collapsibleData.slideMode, collapsibleData.animate,
+					collapsibleData.collapseClickedOutside, collapsibleData.makeOverlay, anchor);
+
+			saveCollapsibleState(collapsibleData.retainCollapsible, collapsibleId, targetDivId, "E");
+		}
+	}
+
+	return false;
+}
+
+
+jQuery(function(){
+  /*
+     * This method restrict backspace keys on any non-input element.
+     */
+    var rx = /INPUT|SELECT|TEXTAREA/i;
+
+    jQuery(document).keydown(function(e){
+        if( e.which == 8 ){ // 8 == backspace
+            if(!rx.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
+                e.preventDefault();
+            }
+        }
+    });
+});
+// Method forms html to be displayed in case of error in a widget.
+function formWidgetErrorPage(textStatus, callBackStatement) {
+	if (typeof window.formCustomWidgetErrorPage === "function") {
+		return formCustomWidgetErrorPage(textStatus, callBackStatement);
+	} else {
+		return "<div style='margin: 0 auto; text-align: center; line-height: 20px;'><div style='color: red;'>"
+			+getMessage(textStatus)
+			+"</div><a class=\"bluelink\" href=\"javascript:"+callBackStatement+"\">"
+			+getMessage("Refresh")+"</a><div>";
+	}
+}
+//Script to show child options with defined height
+function childDisplay(parentID,divID){
+
+           var parentID = document.getElementById(parentID);
+           var divID = document.getElementById(divID);
+
+
+           /* Fetch postition of parent element */
+           var topPosition = parentID.offsetTop;
+           var parentHeight = parentID.offsetHeight;
+	if(divID != null){
+           divID.style.top = topPosition + parentHeight +'px';
+}
+
+}
+function validateExtension(objFileDetails){
+	var strFileDetails = String(objFileDetails);
+	var intFileDetailsLength = strFileDetails.length;
+	var strFileExt = strFileDetails.substr(intFileDetailsLength-4);
+	var response = true;
+
+	if(strFileExt != ".txt" && strFileExt != ".TXT" && strFileExt != ".csv" && strFileExt != ".CSV"){
+		response = false;
+	}
+	return response;
+}
